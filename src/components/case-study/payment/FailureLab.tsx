@@ -5,6 +5,7 @@ import type { FailureScenario } from "@/content/case-studies/payment/types";
 import StepThrough from "@/components/case-study/StepThrough";
 import Timeline from "@/components/case-study/visuals/Timeline";
 import PipelineFlow from "@/components/case-study/visuals/PipelineFlow";
+import Prose from "./Prose";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
@@ -14,14 +15,16 @@ const focusRing =
 // client" component can't call it directly, but it can render an already-
 // rendered element that was passed down as a prop. Indexed 1:1 with
 // `scenarios`; entries are null where a scenario has no code excerpt.
+//
+// Deliberately not wrapped in one big outer card: StepThrough and the
+// scenario visual already carry their own card treatment (they represent
+// genuinely distinct "objects" — a control and a state), so the
+// explanation/limitation below them stay plain prose instead of stacking
+// another card on top.
 export default function FailureLab({
-  title,
-  subtitle,
   scenarios,
   codeBlocks,
 }: {
-  title: string;
-  subtitle: string;
   scenarios: FailureScenario[];
   codeBlocks: (ReactNode | null)[];
 }) {
@@ -31,10 +34,7 @@ export default function FailureLab({
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-zinc-100">{title}</h3>
-      <p className="mt-1.5 text-zinc-400">{subtitle}</p>
-
-      <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Failure scenario">
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Failure scenario">
         {scenarios.map((s) => (
           <button
             key={s.id}
@@ -53,15 +53,16 @@ export default function FailureLab({
         ))}
       </div>
 
-      <div className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
-        <h4 className="text-lg font-semibold text-zinc-100">{scenario.title}</h4>
-
-        {scenario.gapLabel && (
-          <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-800 bg-amber-500/10 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide text-amber-400">
-            <span aria-hidden="true">!</span>
-            {scenario.gapLabel}
-          </span>
-        )}
+      <div className="mt-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <h4 className="text-lg font-semibold text-zinc-100">{scenario.title}</h4>
+          {scenario.gapLabel && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-800 bg-amber-500/10 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide text-amber-400">
+              <span aria-hidden="true">!</span>
+              {scenario.gapLabel}
+            </span>
+          )}
+        </div>
 
         <div className="mt-4">
           <StepThrough steps={scenario.steps} />
@@ -73,15 +74,12 @@ export default function FailureLab({
           </div>
         )}
 
-        <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-950/60 p-4">
-          <h5 className="font-mono text-sm font-semibold text-emerald-400">
-            {scenario.explanationTitle}
-          </h5>
-          <p className="mt-1.5 text-sm text-zinc-300">{scenario.explanation}</p>
+        <div className="mt-4">
+          <Prose paragraphs={scenario.explanation} />
         </div>
 
         {scenario.limitation && (
-          <p className="mt-3 rounded-md border border-amber-900/60 bg-amber-500/5 p-3 text-sm text-zinc-300">
+          <p className="mt-2 border-l-2 border-amber-800 pl-3 text-sm text-zinc-300">
             {scenario.limitation}
           </p>
         )}

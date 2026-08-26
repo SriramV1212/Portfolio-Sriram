@@ -58,6 +58,12 @@ export type DiagramEdge = {
   from: string;
   to: string;
   label?: string;
+  // Optional second label for an edge that represents two distinct
+  // operations along the same connection (e.g. "deliver event" one way,
+  // "commit offset" the other) — avoids drawing two overlapping lines
+  // between the same pair of nodes. Additive/optional so existing diagrams
+  // that don't set it render exactly as before.
+  labelReverse?: string;
   dashed?: boolean;
 };
 

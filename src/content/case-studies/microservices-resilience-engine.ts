@@ -177,8 +177,8 @@ export const microservicesResilienceEngine: CaseStudy = {
     ],
     edges: [
       { from: "client", to: "orchestrator", label: "insecure gRPC" },
-      { from: "orchestrator", to: "user", label: "mTLS + retry" },
-      { from: "orchestrator", to: "search", label: "mTLS + retry + breaker" },
+      { from: "orchestrator", to: "user", label: "mTLS+retry" },
+      { from: "orchestrator", to: "search", label: "mTLS+retry+CB" },
     ],
     details: {
       client: {

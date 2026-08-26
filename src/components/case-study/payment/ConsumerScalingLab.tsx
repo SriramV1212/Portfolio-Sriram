@@ -11,7 +11,8 @@ const focusRing =
 // (round-robin by partition index), and the rest sit idle. This is
 // explicitly a conceptual visualization of "one partition, one owning
 // consumer per group," not a reproduction of Kafka's real assignment
-// algorithm (range vs. sticky vs. cooperative-sticky).
+// algorithm (range vs. sticky vs. cooperative-sticky) — see
+// `assignmentNote`, rendered in the UI below.
 function assignPartitions(partitionCount: number, consumerCount: number) {
   const activeConsumers = Math.min(consumerCount, partitionCount);
   const owners: number[][] = Array.from({ length: consumerCount }, () => []);
@@ -29,7 +30,9 @@ export default function ConsumerScalingLab({ data }: { data: ConsumerScaling }) 
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5">
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Consumer count">
+      <p className="text-sm text-zinc-400">{data.assignmentNote}</p>
+
+      <div className="mt-4 flex flex-wrap gap-1.5" role="group" aria-label="Consumer count">
         {data.consumerOptions.map((count) => (
           <button
             key={count}
@@ -96,7 +99,7 @@ export default function ConsumerScalingLab({ data }: { data: ConsumerScaling }) 
         </table>
       </div>
 
-      <p className="mt-4 text-sm text-zinc-400">{data.takeaway}</p>
+      <p className="mt-4 text-sm text-zinc-300">{data.takeaway}</p>
 
       {/* Measured results, shown only for consumer counts this project
           actually benchmarked — the extra option(s) beyond partition count

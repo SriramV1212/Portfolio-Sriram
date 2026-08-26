@@ -1,41 +1,29 @@
 import type { Invariant } from "@/content/case-studies/payment/types";
 
-const statusStyles: Record<Invariant["status"], { border: string; badge: string; glyph: string }> = {
-  protected: {
-    border: "border-l-emerald-500",
-    badge: "border-emerald-800 bg-emerald-500/10 text-emerald-400",
-    glyph: "✓",
-  },
-  gap: {
-    border: "border-l-amber-500",
-    badge: "border-amber-800 bg-amber-500/10 text-amber-400",
-    glyph: "!",
-  },
+const statusStyles: Record<Invariant["status"], { glyph: string; color: string }> = {
+  protected: { glyph: "✓", color: "text-emerald-400" },
+  gap: { glyph: "!", color: "text-amber-400" },
 };
 
-// Establishes what the rest of the page is protecting before showing any
-// implementation — a small instructional matrix, not a status dashboard.
+// A concise editorial checkpoint, not a status dashboard — one lightly
+// bordered panel holding four rows, rather than four separate cards.
 export default function InvariantPanel({ items }: { items: Invariant[] }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <ul className="divide-y divide-zinc-800 rounded-lg border border-zinc-800">
       {items.map((item) => {
         const style = statusStyles[item.status];
         return (
-          <div
-            key={item.title}
-            className={`rounded-lg border border-zinc-800 border-l-4 bg-zinc-900/40 p-5 ${style.border}`}
-          >
-            <h3 className="font-semibold text-zinc-100">{item.title}</h3>
-            <p className="mt-2 text-sm text-zinc-300">{item.statement}</p>
+          <li key={item.statement} className="flex items-start justify-between gap-4 px-4 py-3">
+            <span className="text-[1.0625rem] leading-snug text-zinc-200">{item.statement}</span>
             <span
-              className={`mt-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide ${style.badge}`}
+              className={`mt-0.5 shrink-0 whitespace-nowrap font-mono text-xs uppercase tracking-wide ${style.color}`}
             >
-              <span aria-hidden="true">{style.glyph}</span>
+              <span aria-hidden="true">{style.glyph} </span>
               {item.statusLabel}
             </span>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }
