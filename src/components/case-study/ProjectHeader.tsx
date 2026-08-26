@@ -8,14 +8,14 @@ import type { ProjectEntry } from "@/data/resume";
 export default function ProjectHeader({ project }: { project: ProjectEntry }) {
   return (
     <>
-      <Link
-        href="/#projects"
-        className="inline-flex items-center gap-1.5 rounded-sm font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
-      >
-        <span aria-hidden="true">←</span> Back to projects
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link
+          href="/#projects"
+          className="inline-flex items-center gap-1.5 rounded-sm font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+        >
+          <span aria-hidden="true">←</span> Back to projects
+        </Link>
 
-      <div className="mt-4 flex justify-end">
         <a
           href={project.githubUrl}
           target="_blank"

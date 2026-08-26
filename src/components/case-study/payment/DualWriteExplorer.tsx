@@ -7,7 +7,13 @@ const subHeading = "mt-8 text-xl font-semibold text-zinc-100";
 // "what happens today," paragraphs building the argument, one inline
 // diagram for the proposed next step — not two side-by-side bordered
 // cards competing with the article for attention.
-export default function DualWriteExplorer({ dualWrite }: { dualWrite: DualWrite }) {
+export default function DualWriteExplorer({
+  dualWrite,
+  usedTerms,
+}: {
+  dualWrite: DualWrite;
+  usedTerms?: Set<string>;
+}) {
   return (
     <div>
       <h3 className="text-lg font-semibold text-zinc-100">{dualWrite.subheading}</h3>
@@ -17,7 +23,7 @@ export default function DualWriteExplorer({ dualWrite }: { dualWrite: DualWrite 
       </pre>
 
       <div className="mt-4">
-        <Prose paragraphs={dualWrite.paragraphs} />
+        <Prose paragraphs={dualWrite.paragraphs} usedTerms={usedTerms} />
       </div>
 
       <div className="mt-8 flex items-center gap-2">
@@ -32,7 +38,7 @@ export default function DualWriteExplorer({ dualWrite }: { dualWrite: DualWrite 
       </pre>
 
       <div className="mt-4">
-        <Prose paragraphs={dualWrite.nextParagraphs} />
+        <Prose paragraphs={dualWrite.nextParagraphs} usedTerms={usedTerms} />
       </div>
 
       <p className="mt-6 border-l-2 border-emerald-800 pl-3 text-lg text-zinc-100">

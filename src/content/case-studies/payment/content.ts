@@ -17,10 +17,10 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
 
   originStory: [
     {
-      text: "The original goal was straightforward: build an event-driven payment-processing backend — accept a request over HTTP, hand the real work off asynchronously, and confirm the request without waiting for that work to finish. Separating synchronous ingestion from asynchronous processing with FastAPI and Kafka wasn't the hard part; wiring a producer and a consumer together is a well-worn pattern.",
+      text: "The original goal was straightforward: build an event-driven payment-processing backend that accepts a request over HTTP, hands the real work off asynchronously, and confirms the request without waiting for that work to finish. Separating synchronous ingestion from asynchronous processing with FastAPI and Kafka wasn't the hard part; wiring a producer and a consumer together is a well-worn pattern.",
     },
     {
-      text: "Once the basic pipeline worked, I stopped adding features for a while and started asking a different question: where could the state of a payment become inconsistent? Not \"does it work\" but \"what happens when it doesn't\" — a crash mid-consumer, a redelivered message, a gap between two systems that both think they're the source of truth.",
+      text: "Once the basic pipeline worked, I stopped adding features for a while and started asking a different question: where could the state of a payment become inconsistent? Not \"does it work\" but \"what happens when it doesn't\": a crash mid-consumer, a redelivered message, a gap between two systems that both think they're the source of truth.",
     },
     {
       text: "That question ended up being more interesting than the original feature list. The rest of this write-up follows that thread: what the system protects today, where it still doesn't, and why.",
@@ -28,7 +28,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
   ],
 
   prerequisiteNote:
-    "HTTP APIs, relational databases, transactions, and basic asynchronous processing. Kafka-specific concepts — partitions, consumer groups, offsets, delivery semantics, idempotency, dead-letter queues — are explained where they affect this system.",
+    "HTTP APIs, relational databases, transactions, and basic asynchronous processing. Kafka-specific concepts (partitions, consumer groups, offsets, delivery semantics, idempotency, dead-letter queues) are explained where they affect this system.",
 
   invariants: {
     title: "What must remain true?",
@@ -74,13 +74,13 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
         },
         {
           caption:
-            "FastAPI writes the payment to Postgres as \"pending\" and commits — this row now exists permanently, before anything else happens.",
+            "FastAPI writes the payment to Postgres as \"pending\" and commits; this row now exists permanently, before anything else happens.",
           nodeIds: ["api", "postgres"],
           edgeIds: ["e2"],
         },
         {
           caption:
-            "FastAPI separately produces the event to Kafka, keyed by user ID — a second, independent step, not part of the same transaction.",
+            "FastAPI separately produces the event to Kafka, keyed by user ID: a second, independent step, not part of the same transaction.",
           nodeIds: ["api", "kafka"],
           edgeIds: ["e3"],
         },
@@ -103,7 +103,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
         },
         {
           caption:
-            "If processing had failed instead, the event would go to the dead-letter queue with its error context — not disappear silently.",
+            "If processing had failed instead, the event would go to the dead-letter queue with its error context, not disappear silently.",
           nodeIds: ["consumer", "dlq"],
           edgeIds: ["e7"],
         },
@@ -111,8 +111,8 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
     },
     pathSteps: [
       "The client sends POST /payments with a user ID and an amount.",
-      "FastAPI validates the request, writes the payment row to Postgres as pending, and commits — that row now exists permanently, regardless of anything that happens next.",
-      "Only after that commit does FastAPI separately produce an event to Kafka, then return a response to the client — without waiting for the payment to actually be processed.",
+      "FastAPI validates the request, writes the payment row to Postgres as pending, and commits; that row now exists permanently, regardless of anything that happens next.",
+      "Only after that commit does FastAPI separately produce an event to Kafka, then return a response to the client, without waiting for the payment to actually be processed.",
       "Sometime later, at its own pace, the consumer polls that event off Kafka.",
       "Before touching any balance, it tries to register the event's ID in a table that only accepts each ID once; if that fails, it already knows this is a redelivery and stops right there.",
       "Otherwise, it updates the balance and marks the payment processed, inside one database transaction.",
@@ -158,7 +158,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
           {
             title: "The state is not applied twice",
             plain:
-              "The insert affects zero rows — the event ID already exists — so the consumer recognizes this as a duplicate and stops before the balance is touched again.",
+              "The insert affects zero rows, since the event ID already exists, so the consumer recognizes this as a duplicate and stops before the balance is touched again.",
           },
         ],
         visual: {
@@ -180,7 +180,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
               start: 1,
               duration: 0,
               color: "default",
-              description: "Balance updated, payment marked processed — the transaction commits.",
+              description: "Balance updated, payment marked processed; the transaction commits.",
             },
             {
               id: "crash",
@@ -189,7 +189,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
               duration: 0,
               color: "fail",
               description:
-                "The process dies before it ever tells Kafka \"I'm done with this one\" — the offset was never committed.",
+                "The process dies before it ever tells Kafka \"I'm done with this one\"; the offset was never committed.",
             },
             {
               id: "redeliver",
@@ -207,7 +207,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
               duration: 0,
               color: "success",
               description:
-                "The processed_events insert affects zero rows — the consumer stops before touching the balance again.",
+                "The processed_events insert affects zero rows, so the consumer stops before touching the balance again.",
             },
           ],
         },
@@ -216,7 +216,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
             text: "The important guarantee here is not that Kafka delivers each event exactly once.",
           },
           {
-            text: "Kafka durably retains events according to its replication, acknowledgment, and retention configuration, while consumers track progress using offsets. If this consumer crashes before committing its offset, Kafka may deliver the event again — and the consumer is written to tolerate that redelivery rather than assume it won't happen, enforced by the event_id uniqueness check in Postgres.",
+            text: "Kafka durably retains events according to its replication, acknowledgment, and retention configuration, while consumers track progress using offsets. If this consumer crashes before committing its offset, Kafka may deliver the event again, and the consumer is written to tolerate that redelivery rather than assume it won't happen, enforced by the event_id uniqueness check in Postgres.",
           },
         ],
         code: {
@@ -229,7 +229,7 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
 if cursor.rowcount == 0:
     return  # already handled this exact event`,
           explanation:
-            "The duplicate check is database-enforced in one atomic statement — not a separate check-then-insert sequence that could race.",
+            "The duplicate check is database-enforced in one atomic statement, not a separate check-then-insert sequence that could race.",
         },
       },
       {
@@ -244,11 +244,11 @@ if cursor.rowcount == 0:
           {
             title: "Processing fails",
             plain:
-              "An exception is raised partway through handling — malformed event data, a downstream error, anything that isn't the happy path.",
+              "An exception is raised partway through handling: malformed event data, a downstream error, anything that isn't the happy path.",
           },
           {
             title: "The database transaction rolls back where applicable",
-            plain: "Any partial writes for this event are undone — nothing half-updates.",
+            plain: "Any partial writes for this event are undone; nothing half-updates.",
           },
           {
             title: "The event is published to the dead-letter queue",
@@ -278,7 +278,7 @@ if cursor.rowcount == 0:
             text: "A dead-letter queue preserves failed events, but it is not a recovery system by itself.",
           },
           {
-            text: "Investigation and safe reprocessing still require separate operational logic — right now, the DLQ consumer logs the failure but doesn't store it anywhere reviewable or retry it automatically.",
+            text: "Investigation and safe reprocessing still require separate operational logic; right now, the DLQ consumer logs the failure but doesn't store it anywhere reviewable or retry it automatically.",
           },
         ],
       },
@@ -294,12 +294,12 @@ if cursor.rowcount == 0:
           {
             title: "FastAPI commits the payment row to PostgreSQL",
             plain:
-              "A pending row is written and the transaction commits — this payment now permanently exists in the system's records.",
+              "A pending row is written and the transaction commits; this payment now permanently exists in the system's records.",
           },
           {
             title: "The application crashes, or the Kafka publish fails",
             plain:
-              "Say the broker is unreachable, or the producer's buffer is full — flush() has no timeout, so this can also hang indefinitely instead of failing fast.",
+              "Say the broker is unreachable, or the producer's buffer is full; flush() has no timeout, so this can also hang indefinitely instead of failing fast.",
           },
           {
             title: "The Kafka publish never happens",
@@ -322,7 +322,7 @@ if cursor.rowcount == 0:
         },
         explanation: [
           {
-            text: "This is the dual-write problem: two independent systems — Postgres and Kafka — are both supposed to reflect the same event, but nothing ties their two writes into one atomic operation. Success in one does not guarantee success in the other. It's covered in full below, since it's the most significant open gap in the current design.",
+            text: "This is the dual-write problem: two independent systems, Postgres and Kafka, are both supposed to reflect the same event, but nothing ties their two writes into one atomic operation. Success in one does not guarantee success in the other. It's covered in full below, since it's the most significant open gap in the current design.",
           },
         ],
         gapLabel: "Known gap in current implementation",
@@ -363,7 +363,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
           },
           {
             label: "Why it matters",
-            text: "If the consumer group advances past an event before the application-side work finishes, a crash can leave the group with no normal reason to redeliver that event — Kafka has no way to know the work never actually happened. Manual commits keep \"Kafka thinks this is done\" aligned with \"the database agrees it's done.\"",
+            text: "If the consumer group advances past an event before the application-side work finishes, a crash can leave the group with no normal reason to redeliver that event, since Kafka has no way to know the work never actually happened. Manual commits keep \"Kafka thinks this is done\" aligned with \"the database agrees it's done.\"",
           },
         ],
         comparisonDiagram:
@@ -376,7 +376,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
             text: "When processing throws partway through, the event is moved to a dedicated dead-letter topic instead of crashing the consumer or retrying forever inline.",
           },
           {
-            text: "Those are still manual today — the DLQ consumer currently just logs what arrives.",
+            text: "Those are still manual today; the DLQ consumer currently just logs what arrives.",
           },
         ],
         solves: ["visibility", "isolation", "continued processing of everything behind it"],
@@ -390,7 +390,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
     intro:
       "The Failure Lab above is about correctness under crashes; this is about throughput under load, and it runs into a different kind of limit.",
     assignmentNote:
-      "This is a conceptual assignment visualization — the exact algorithm Kafka uses to assign partitions may differ, but one partition is owned by at most one consumer within a consumer group at a time.",
+      "This is a conceptual assignment visualization: the exact algorithm Kafka uses to assign partitions may differ, but one partition is owned by at most one consumer within a consumer group at a time.",
     partitionCount: 4,
     consumerOptions: [1, 3, 4, 6],
     measured: [
@@ -401,7 +401,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
     measuredLabel: "1,000 simulated events, 4-partition topic",
     disclaimer: "This is a learning benchmark, not a production throughput claim.",
     takeaway:
-      "Within one consumer group, useful parallelism is bounded by partition count — a 5th or 6th consumer in the same group just sits idle.",
+      "Within one consumer group, useful parallelism is bounded by partition count; a 5th or 6th consumer in the same group just sits idle.",
   },
 
   dualWrite: {
@@ -410,16 +410,16 @@ ON CONFLICT (event_id) DO NOTHING;`,
     currentDiagram: "FastAPI\n  ├── PostgreSQL commit ✓\n  └── Kafka publish ✕",
     paragraphs: [
       {
-        text: "Postgres and Kafka are two separate systems with no shared transaction between them. FastAPI commits the payment row first, then — as a second, independent step — tries to publish the corresponding event to Kafka.",
+        text: "Postgres and Kafka are two separate systems with no shared transaction between them. FastAPI commits the payment row first, then, as a second and independent step, tries to publish the corresponding event to Kafka.",
       },
       {
         text: "A normal Postgres transaction can't atomically include a Kafka publish; there's no two-phase commit tying the two together. So the success of the first operation says nothing about whether the second will succeed.",
       },
       {
-        text: "If the broker is unreachable, or the producer's buffer is full, that publish can fail outright — or hang, since the flush call here has no timeout. Either way, Postgres now has a payment that Kafka has never heard of, and no consumer will ever see it.",
+        text: "If the broker is unreachable, or the producer's buffer is full, that publish can fail outright, or hang, since the flush call here has no timeout. Either way, Postgres now has a payment that Kafka has never heard of, and no consumer will ever see it.",
       },
       {
-        text: "The obvious-looking fix — retry the publish — doesn't fully solve it either. A retry after an ambiguous failure (a timeout, a connection reset) can't always tell whether the first attempt actually landed, so blind retries can create a second, duplicate event for the same payment.",
+        text: "The obvious-looking fix, retrying the publish, doesn't fully solve it either. A retry after an ambiguous failure (a timeout, a connection reset) can't always tell whether the first attempt actually landed, so blind retries can create a second, duplicate event for the same payment.",
       },
       {
         text: "That's exactly why consumer-side idempotency, covered above, still matters even if the producer side gets more reliable: at-least-once delivery is what a producer retry buys you, and duplicates are the cost of that guarantee.",
@@ -431,14 +431,14 @@ ON CONFLICT (event_id) DO NOTHING;`,
       "ONE PostgreSQL transaction\n├── payment row\n└── outbox event row\n\noutbox publisher\n       ↓\n     Kafka",
     nextParagraphs: [
       {
-        text: "Writing the payment row and an \"outbox\" event row in the same Postgres transaction means either both exist or neither does — no window where one system knows about a payment the other doesn't. A separate publisher process then relays outbox rows to Kafka at its own pace.",
+        text: "Writing the payment row and an \"outbox\" event row in the same Postgres transaction means either both exist or neither does, with no window where one system knows about a payment the other doesn't. A separate publisher process then relays outbox rows to Kafka at its own pace.",
       },
       {
         label: "Tradeoff",
-        text: "This closes the gap described above, but adds a new moving part — the publisher — with its own failure mode: it can crash after sending to Kafka but before marking a row relayed, producing a duplicate publish. Consumers still need idempotency either way.",
+        text: "This closes the gap described above, but adds a new moving part, the publisher, with its own failure mode: it can crash after sending to Kafka but before marking a row relayed, producing a duplicate publish. Consumers still need idempotency either way.",
       },
       {
-        text: "A simpler, complementary option is reconciliation: identify payments that remain pending beyond an expected processing window, and reconcile them against downstream processing records — no new write path, just a periodic check over the existing one.",
+        text: "A simpler, complementary option is reconciliation: identify payments that remain pending beyond an expected processing window, and reconcile them against downstream processing records; no new write path, just a periodic check over the existing one.",
       },
     ],
     lesson:
@@ -460,7 +460,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
           },
           {
             label: "Tradeoff",
-            text: "Manual offset control increases implementation responsibility — every code path, including failures routed to the DLQ, has to explicitly decide when it's safe to commit — but it lets processing completion align more closely with persisted application state instead of a timer.",
+            text: "Manual offset control increases implementation responsibility (every code path, including failures routed to the DLQ, has to explicitly decide when it's safe to commit), but it lets processing completion align more closely with persisted application state instead of a timer.",
           },
         ],
       },
@@ -476,7 +476,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
           },
           {
             label: "Tradeoff",
-            text: "An in-memory check is faster, but forgets everything on restart and doesn't hold up once there's more than one consumer process — the database constraint survives both, at the cost of one extra write per event.",
+            text: "An in-memory check is faster, but forgets everything on restart and doesn't hold up once there's more than one consumer process; the database constraint survives both, at the cost of one extra write per event.",
           },
         ],
       },
@@ -492,7 +492,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
           },
           {
             label: "Tradeoff",
-            text: "Preserving per-user ordering constrains where those events can be processed — every event for one user is bound to a single partition, and therefore to whichever single consumer owns it, rather than being freely spreadable across the whole group.",
+            text: "Preserving per-user ordering constrains where those events can be processed: every event for one user is bound to a single partition, and therefore to whichever single consumer owns it, rather than being freely spreadable across the whole group.",
           },
         ],
       },
@@ -525,15 +525,15 @@ ON CONFLICT (event_id) DO NOTHING;`,
 VALUES (%s)
 ON CONFLICT (event_id) DO NOTHING;`,
         explanation:
-          "The duplicate check is database-enforced in one atomic statement — not a separate check-then-insert sequence that could race.",
+          "The duplicate check is database-enforced in one atomic statement, not a separate check-then-insert sequence that could race.",
       },
       {
         title: "Where the DB commit and Kafka publish diverge",
         lang: "python",
         code: `conn.commit()          # payment row now permanently exists
-produce_event(event)   # separate step — can still fail on its own`,
+produce_event(event)   # separate step, can still fail on its own`,
         explanation:
-          "These operations succeed or fail independently — see \"The failure my current design does not solve\" above for what that means when the second one doesn't.",
+          "These operations succeed or fail independently; see \"The failure my current design does not solve\" above for what that means when the second one doesn't.",
       },
     ],
   },
@@ -547,7 +547,7 @@ produce_event(event)   # separate step — can still fail on its own`,
       },
       {
         heading: "DLQ recovery",
-        text: "Build safe replay tooling — right now a failed event can be seen, but not reprocessed, without manual intervention.",
+        text: "Build safe replay tooling; right now a failed event can be seen, but not reprocessed, without manual intervention.",
       },
       {
         heading: "Retry strategy",
@@ -555,11 +555,11 @@ produce_event(event)   # separate step — can still fail on its own`,
       },
       {
         heading: "Observability",
-        text: "Track processing latency, consumer lag, failure counts, and DLQ volume — right now the only visibility into consumer health is log lines.",
+        text: "Track processing latency, consumer lag, failure counts, and DLQ volume; right now the only visibility into consumer health is log lines.",
       },
       {
         heading: "External processor simulation",
-        text: "Simulate a real payment processor's failure modes — timeouts, ambiguous outcomes, retries — and test reconciliation against them.",
+        text: "Simulate a real payment processor's failure modes (timeouts, ambiguous outcomes, retries) and test reconciliation against them.",
       },
     ],
   },
@@ -568,16 +568,16 @@ produce_event(event)   # separate step — can still fail on its own`,
     title: "What this project taught me",
     paragraphs: [
       {
-        text: "Kafka doesn't remove application-level correctness problems — it relocates them. At-least-once delivery means duplicates are a normal, expected outcome, not an edge case, and that pushes the responsibility for correctness into how the consumer is written, not into the broker's guarantees.",
+        text: "Kafka doesn't remove application-level correctness problems; it relocates them. At-least-once delivery means duplicates are a normal, expected outcome, not an edge case, and that pushes the responsibility for correctness into how the consumer is written, not into the broker's guarantees.",
       },
       {
         text: "Database constraints turned out to be one of the more useful tools here, not just for data integrity but as a concurrency primitive: a unique constraint with ON CONFLICT DO NOTHING answers \"have I seen this before?\" atomically, in a way an in-memory check can't.",
       },
       {
-        text: "\"Processing succeeded\" only means something once you've defined which state transitions actually need to be durable — the offset commit exists specifically to encode that definition in a way Kafka can act on.",
+        text: "\"Processing succeeded\" only means something once you've defined which state transitions actually need to be durable; the offset commit exists specifically to encode that definition in a way Kafka can act on.",
       },
       {
-        text: "And the hardest failures in this project weren't inside any single component — Postgres and the consumer are both individually reliable. They showed up at the seam between two systems that don't share a transaction, which is exactly where the dual-write gap above still lives.",
+        text: "And the hardest failures in this project weren't inside any single component; Postgres and the consumer are both individually reliable. They showed up at the seam between two systems that don't share a transaction, which is exactly where the dual-write gap above still lives.",
       },
     ],
   },
@@ -586,17 +586,17 @@ produce_event(event)   # separate step — can still fail on its own`,
     {
       term: "Partition",
       definition:
-        "A Kafka topic is split into an ordered, independent log per partition — order is preserved within one partition, not guaranteed across partitions.",
+        "A Kafka topic is split into an ordered, independent log per partition; order is preserved within one partition, not guaranteed across partitions.",
     },
     {
       term: "Consumer group",
       definition:
-        "A named set of consumers sharing the work of reading a topic — Kafka guarantees each partition is owned by exactly one consumer in the group at a time.",
+        "A named set of consumers sharing the work of reading a topic: Kafka guarantees each partition is owned by exactly one consumer in the group at a time.",
     },
     {
       term: "Offset",
       definition:
-        "Kafka's bookmark of how far a consumer has read in a partition — committing an offset means telling Kafka \"I've handled everything up to here.\"",
+        "Kafka's bookmark of how far a consumer has read in a partition: committing an offset means telling Kafka \"I've handled everything up to here.\"",
     },
     {
       term: "Idempotency",
@@ -611,12 +611,12 @@ produce_event(event)   # separate step — can still fail on its own`,
     {
       term: "Dual-write problem",
       definition:
-        "The risk of writing related data to two independent systems with no shared transaction — one write can succeed while the other fails, leaving them out of sync.",
+        "The risk of writing related data to two independent systems with no shared transaction: one write can succeed while the other fails, leaving them out of sync.",
     },
     {
       term: "Transactional outbox",
       definition:
-        "A pattern where the event to publish is written in the same database transaction as the primary write, then relayed to the broker by a separate process — so the two writes can't diverge.",
+        "A pattern where the event to publish is written in the same database transaction as the primary write, then relayed to the broker by a separate process, so the two writes can't diverge.",
     },
   ],
 };

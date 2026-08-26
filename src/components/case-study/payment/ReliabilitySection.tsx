@@ -7,14 +7,20 @@ const subHeading = "mt-8 text-xl font-semibold text-zinc-100";
 // Inline code here is deliberately lightweight (<pre>, no Shiki chrome) —
 // it's a teaching aid embedded in prose, distinct from the polished,
 // titled excerpts in the "Code that proves the claim" section later on.
-export default function ReliabilitySection({ items }: { items: ReliabilitySubsection[] }) {
+export default function ReliabilitySection({
+  items,
+  usedTerms,
+}: {
+  items: ReliabilitySubsection[];
+  usedTerms?: Set<string>;
+}) {
   return (
     <div>
       {items.map((item) => (
         <div key={item.heading}>
           <h3 className={subHeading}>{item.heading}</h3>
           <div className="mt-3">
-            <Prose paragraphs={item.paragraphs.slice(0, 1)} />
+            <Prose paragraphs={item.paragraphs.slice(0, 1)} usedTerms={usedTerms} />
           </div>
 
           {item.codeBad && (
@@ -66,7 +72,7 @@ export default function ReliabilitySection({ items }: { items: ReliabilitySubsec
 
           {item.paragraphs.length > 1 && (
             <div className="mt-4">
-              <Prose paragraphs={item.paragraphs.slice(1)} />
+              <Prose paragraphs={item.paragraphs.slice(1)} usedTerms={usedTerms} />
             </div>
           )}
         </div>

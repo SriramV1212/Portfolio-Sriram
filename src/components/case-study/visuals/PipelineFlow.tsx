@@ -226,6 +226,27 @@ export default function PipelineFlow({
           const midY = (p1.y + p2.y) / 2;
           const blocked = edge.style === "blocked";
 
+          // A flat vertical offset clears a same-row (horizontal) edge
+          // fine, but does nothing useful once an edge also changes row —
+          // the label just sits near/on the diagonal line. Offset
+          // perpendicular to the edge's actual direction instead, scaled
+          // by the label's own width so it clears diagonal edges too; for
+          // a horizontal edge this reduces to (almost) the old behavior.
+          const ldx = p2.x - p1.x;
+          const ldy = p2.y - p1.y;
+          const lineLen = Math.hypot(ldx, ldy) || 1;
+          let lpx = -ldy / lineLen;
+          let lpy = ldx / lineLen;
+          if (lpy > 0) {
+            lpx = -lpx;
+            lpy = -lpy;
+          }
+          const labelOffsetFor = (text: string, extra = 0) => {
+            const halfWidth = (text.length * EDGE_LABEL_CHAR_WIDTH) / 2;
+            const projection = halfWidth * Math.abs(lpx) + 5 * Math.abs(lpy);
+            return Math.max(projection, 8) + 4 + extra;
+          };
+
           return (
             <g key={i}>
               {blocked && (
@@ -240,8 +261,8 @@ export default function PipelineFlow({
               )}
               {edge.label && (
                 <text
-                  x={midX}
-                  y={midY - (blocked ? 14 : 8)}
+                  x={midX + lpx * labelOffsetFor(edge.label, blocked ? 6 : 0)}
+                  y={midY + lpy * labelOffsetFor(edge.label, blocked ? 6 : 0)}
                   textAnchor="middle"
                   className={`font-mono text-[9px] uppercase tracking-wide ${
                     blocked ? "fill-red-400" : "fill-zinc-500"
@@ -252,8 +273,8 @@ export default function PipelineFlow({
               )}
               {edge.labelReverse && (
                 <text
-                  x={midX}
-                  y={midY + 16}
+                  x={midX - lpx * labelOffsetFor(edge.labelReverse)}
+                  y={midY - lpy * labelOffsetFor(edge.labelReverse)}
                   textAnchor="middle"
                   className="fill-zinc-500 font-mono text-[9px] uppercase tracking-wide"
                 >

@@ -129,7 +129,7 @@ export default function ConsumerScalingLab({ data }: { data: ConsumerScaling }) 
           ))}
           {!measured && (
             <p className="text-sm text-zinc-500">
-              No measured run at {consumerCount} consumers — this option is shown only to
+              No measured run at {consumerCount} consumers; this option is shown only to
               illustrate the partition ceiling above.
             </p>
           )}

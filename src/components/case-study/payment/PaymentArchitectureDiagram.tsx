@@ -279,7 +279,7 @@ export default function PaymentArchitectureDiagram({
             <p className="mt-1.5 text-sm text-zinc-200">{active.caption}</p>
           </>
         ) : (
-          <p className="text-sm text-zinc-400">{diagram.trace.length > 0 && "The full pipeline — step through a request below, or click a step directly."}</p>
+          <p className="text-sm text-zinc-400">{diagram.trace.length > 0 && "The full pipeline: step through a request below, or click a step directly."}</p>
         )}
       </div>
 
