@@ -213,10 +213,10 @@ export const paymentCaseStudy: PaymentCaseStudyContent = {
         },
         explanation: [
           {
-            text: "The important guarantee here is not that Kafka delivers each event exactly once.",
+            text: "The system does not depend on the event being delivered only once. It makes redelivery safe.",
           },
           {
-            text: "Kafka durably retains events according to its replication, acknowledgment, and retention configuration, while consumers track progress using offsets. If this consumer crashes before committing its offset, Kafka may deliver the event again, and the consumer is written to tolerate that redelivery rather than assume it won't happen, enforced by the event_id uniqueness check in Postgres.",
+            text: "Kafka durably retains events according to its replication, acknowledgment, and retention configuration, while consumers track progress using offsets. A crash before the offset commits can cause a redelivery, and the consumer is built to tolerate that rather than assume it won't happen, enforced by the event_id uniqueness check in Postgres.",
           },
         ],
         code: {
@@ -275,7 +275,7 @@ if cursor.rowcount == 0:
         },
         explanation: [
           {
-            text: "A dead-letter queue preserves failed events, but it is not a recovery system by itself.",
+            text: "A DLQ preserves and isolates failed events, but it is not a complete recovery workflow by itself.",
           },
           {
             text: "Investigation and safe reprocessing still require separate operational logic; right now, the DLQ consumer logs the failure but doesn't store it anywhere reviewable or retry it automatically.",
@@ -338,7 +338,7 @@ if cursor.rowcount == 0:
         heading: "Making redelivery safe",
         paragraphs: [
           {
-            text: "The Failure Lab above showed what happens when Kafka redelivers an event: the consumer needs a way to recognize \"I've already handled this one\" before it touches any balance. That recognition has to be atomic, or it doesn't actually protect anything.",
+            text: "The consumer needs to recognize \"I've already handled this event\" before it touches any balance, and that recognition has to be atomic, or it doesn't actually protect anything.",
           },
         ],
         codeBad: {
@@ -452,7 +452,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
         heading: "Why manual offset commits?",
         paragraphs: [
           {
-            text: "The consumer explicitly disables Kafka's automatic offset advancement and commits by hand, only once the database work backing that message has actually committed.",
+            text: "I wanted the offset commit to mean something specific: that the database work for this message actually finished, not that a timer elapsed.",
           },
           {
             label: "Alternative considered",
@@ -468,7 +468,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
         heading: "Why database-enforced event idempotency, not an in-memory check?",
         paragraphs: [
           {
-            text: "Before doing anything else, the consumer tries to insert the event's ID into a table where each ID can only exist once, and treats a rejected insert as already handled.",
+            text: "I wanted the \"have I processed this event?\" decision to be atomic. A database uniqueness constraint avoids a separate check-then-insert race and makes duplicate detection part of the transaction boundary.",
           },
           {
             label: "Alternative considered",
@@ -492,7 +492,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
           },
           {
             label: "Tradeoff",
-            text: "Preserving per-user ordering constrains where those events can be processed: every event for one user is bound to a single partition, and therefore to whichever single consumer owns it, rather than being freely spreadable across the whole group.",
+            text: "Preserving per-user ordering constrains where those events can be processed: every event for one user is bound to a single partition, and therefore to whichever single consumer owns it, rather than being freely spreadable across the whole group. It can also create uneven partition load if some users generate substantially more traffic than others, since their events all queue behind the same partition regardless of how idle the rest of the topic is.",
           },
         ],
       },
@@ -500,7 +500,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
         heading: "Why a DLQ that isolates failures but doesn't yet close the loop on them?",
         paragraphs: [
           {
-            text: "When something goes wrong processing a payment, the event is moved to its own topic with the error attached, instead of crashing the consumer or getting silently dropped.",
+            text: "I wanted a failed event to stay visible and out of the way of everything behind it, without having to solve reprocessing on day one.",
           },
           {
             label: "Alternative considered",
@@ -508,7 +508,7 @@ ON CONFLICT (event_id) DO NOTHING;`,
           },
           {
             label: "Tradeoff",
-            text: "Shipping \"quarantine failures separately\" first protects the main stream immediately; the reprocessing half is real, separate work that hasn't been built yet.",
+            text: "Shipping \"quarantine failures separately\" first protects the main stream immediately. It also creates an operational responsibility this project hasn't built yet: investigating and eventually reprocessing or resolving those events safely.",
           },
         ],
       },
