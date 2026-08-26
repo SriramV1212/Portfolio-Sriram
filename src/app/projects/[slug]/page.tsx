@@ -51,6 +51,18 @@ export default async function ProjectDetailPage({
         <span aria-hidden="true">←</span> Back to projects
       </Link>
 
+      <div className="mt-4 flex justify-end">
+        <a
+          href={project.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+        >
+          View on GitHub
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
       <h1 className="mt-4 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">
         {project.name}
       </h1>
@@ -65,16 +77,6 @@ export default async function ProjectDetailPage({
           </li>
         ))}
       </ul>
-
-      <a
-        href={project.githubUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 inline-flex items-center gap-1.5 rounded-sm text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
-      >
-        View on GitHub
-        <span aria-hidden="true">→</span>
-      </a>
 
       <p className="mt-8 text-lg text-zinc-200">{caseStudy.hook}</p>
 
@@ -211,9 +213,7 @@ export default async function ProjectDetailPage({
         </div>
       </section>
 
-      <section className="mt-10">
-        <Glossary terms={caseStudy.glossary} />
-      </section>
+      <Glossary terms={caseStudy.glossary} />
 
       <div className="mt-12 border-t border-zinc-800 pt-6">
         <a

@@ -114,13 +114,13 @@ export default function ClickableStateMachine({
                   setCurrent(s.id);
                 }
               }}
-              className="cursor-pointer focus-visible:outline-none"
+              className="group cursor-pointer outline-none"
             >
               <circle
                 cx={s.x}
                 cy={s.y}
                 r={NODE_R}
-                className={`fill-zinc-900 transition-colors ${
+                className={`fill-zinc-900 transition-colors group-focus-visible:stroke-white ${
                   isCurrent
                     ? "stroke-emerald-400"
                     : isReachable

@@ -105,7 +105,7 @@ export default function InteractiveDiagram({
                   setSelected(node.id);
                 }
               }}
-              className="cursor-pointer focus-visible:outline-none"
+              className="group cursor-pointer outline-none"
             >
               <rect
                 x={node.x}
@@ -113,7 +113,7 @@ export default function InteractiveDiagram({
                 width={w}
                 height={h}
                 rx={8}
-                className={`fill-zinc-900 transition-colors ${
+                className={`fill-zinc-900 transition-colors group-focus-visible:stroke-white ${
                   isSelected
                     ? "stroke-emerald-400"
                     : "stroke-zinc-600 hover:stroke-emerald-500"

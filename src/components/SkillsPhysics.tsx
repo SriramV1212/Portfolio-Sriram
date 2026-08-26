@@ -119,14 +119,16 @@ export default function SkillsPhysics({ skills }: { skills: string[] }) {
       }
     });
 
-    // Matter binds its own legacy wheel listener (to stop page scroll from
-    // moving the mouse point mid-drag) that also blocks normal page
-    // scrolling whenever the cursor is over the widget — remove it so
-    // scrolling past the section still works.
+    // Matter binds its own "wheel" listener (to stop page scroll from moving
+    // the mouse point mid-drag) that calls preventDefault() unconditionally,
+    // which blocks normal page scrolling whenever the cursor is over the
+    // widget — remove it so scrolling past the section still works. (Matter
+    // registers this on the modern "wheel" event, not the legacy
+    // "mousewheel"/"DOMMouseScroll" names, so it must be removed by that
+    // name to actually take effect.)
     const mousewheelHandler = (mouse as unknown as { mousewheel: (e: Event) => void })
       .mousewheel;
-    container.removeEventListener("mousewheel", mousewheelHandler);
-    container.removeEventListener("DOMMouseScroll", mousewheelHandler);
+    container.removeEventListener("wheel", mousewheelHandler);
 
     const bodies = pillRefs.current.map((el, i) => {
       const pillWidth = el ? el.offsetWidth : 100;

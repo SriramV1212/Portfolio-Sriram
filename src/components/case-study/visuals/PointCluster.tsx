@@ -82,7 +82,7 @@ export default function PointCluster({
                   setSelected(isSelected ? null : p.id);
                 }
               }}
-              className={`cursor-pointer transition-opacity focus-visible:outline-none ${
+              className={`group cursor-pointer outline-none transition-opacity ${
                 dimmed ? "opacity-30" : "opacity-100"
               }`}
             >
@@ -93,7 +93,7 @@ export default function PointCluster({
                   width={8}
                   height={8}
                   transform={`rotate(45 ${p.x} ${p.y})`}
-                  className={`${colorClass} stroke-white`}
+                  className={`${colorClass} stroke-white group-focus-visible:stroke-white`}
                   strokeWidth={isSelected ? 1.5 : 0.75}
                 />
               ) : (
@@ -103,7 +103,7 @@ export default function PointCluster({
                   r={isSelected ? 5 : 4}
                   className={`${colorClass} ${
                     isSelected ? "stroke-white" : "stroke-transparent"
-                  }`}
+                  } group-focus-visible:stroke-white`}
                   strokeWidth={1.5}
                 />
               )}

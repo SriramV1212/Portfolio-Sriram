@@ -75,14 +75,16 @@ export default function Timeline({
                   setSelected(isSelected ? null : seg.id);
                 }
               }}
-              className="cursor-pointer focus-visible:outline-none"
+              className="group cursor-pointer outline-none"
             >
               {isMarker ? (
                 <circle
                   cx={x}
                   cy={TRACK_Y + TRACK_H / 2}
                   r={isSelected ? 7 : 5.5}
-                  className={`${fill} ${isSelected ? "stroke-white" : "stroke-transparent"}`}
+                  className={`${fill} ${
+                    isSelected ? "stroke-white" : "stroke-transparent"
+                  } group-focus-visible:stroke-white`}
                   strokeWidth={1.5}
                 />
               ) : (
@@ -92,7 +94,9 @@ export default function Timeline({
                   width={w}
                   height={TRACK_H}
                   rx={3}
-                  className={`${fill} ${isSelected ? "stroke-white" : "stroke-transparent"}`}
+                  className={`${fill} ${
+                    isSelected ? "stroke-white" : "stroke-transparent"
+                  } group-focus-visible:stroke-white`}
                   strokeWidth={1.5}
                 />
               )}

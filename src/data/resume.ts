@@ -15,7 +15,7 @@ export const heroPhrases = [
   personal.role,
   "Problem Solving",
   "User-First Solutions",
-  "Innovator",
+  "Distributed Systems",
 ];
 
 export const about = {
@@ -55,7 +55,6 @@ export type ProjectEntry = {
   slug: string;
   name: string;
   description: string;
-  why: string;
   tags: string[];
   githubUrl: string;
 };
@@ -66,7 +65,6 @@ export const projects: ProjectEntry[] = [
     name: "Agentic RAG System",
     description:
       "An end-to-end RAG pipeline over Anthropic's API documentation — markdown-aware chunking into ~3,100 chunks, sentence-transformer embeddings, and a self-hosted Qdrant vector store, with full ingestion completing in under 60 seconds. Retrieval is exposed through a custom MCP server (built on the Python MCP SDK) with 4 tools, wired into an agent framework so the agent can only retrieve through MCP — no direct database access. The whole stack runs on a self-managed VPS behind Nginx/TLS with Docker, systemd, and a scripted GitHub Actions redeploy, with a Next.js frontend that includes a retrieval-inspector UI showing citation sources and similarity scores.",
-    why: "The interesting part is the enforcement boundary: the agent is architecturally incapable of bypassing the MCP layer to hit the vector store directly, and every answer traces back to its source chunks with a similarity score.",
     tags: [
       "Python",
       "MCP",
@@ -85,7 +83,6 @@ export const projects: ProjectEntry[] = [
     name: "Real-Time Event-Driven Payment Processing Backend",
     description:
       "An event-driven payment backend using FastAPI and Apache Kafka to decouple synchronous API ingestion from asynchronous downstream processing, backed by a PostgreSQL state machine that tracks each payment through pending, processed, and failed states. Processing is idempotent — event IDs are tracked with conflict-safe inserts and Kafka offsets are committed manually, so a consumer crash can't cause duplicate charges or lost events. Failed events are routed to a dedicated dead-letter queue topic with structured error context, validated by load-testing with a producer simulating 1,000 payment requests.",
-    why: "The focus here is correctness under failure — idempotency, manual offset commits, and a DLQ are the unglamorous parts of payment infrastructure that actually matter once something crashes mid-stream.",
     tags: ["FastAPI", "Apache Kafka", "PostgreSQL", "Python"],
     githubUrl:
       "https://github.com/SriramV1212/Real-Time-Event-Driven-Payment-Processing-Backend",
@@ -95,7 +92,6 @@ export const projects: ProjectEntry[] = [
     name: "Distributed Microservices Orchestration & Resilience Engine",
     description:
       "A multi-service gRPC backend with a central orchestrator aggregating responses from separate User and Search services over protobuf-defined contracts, using server-side streaming for real-time result delivery. Circuit breakers and exponential backoff retries contain partial failures across services, and mutual TLS secures every cross-service call. Distributed tracing runs through OpenTelemetry gRPC interceptors capturing both function- and business-level spans, visualized in Jaeger, with Prometheus and Grafana for metrics — the observability stack runs via Docker Compose.",
-    why: "Built to understand, hands-on, how the resilience and observability patterns behind real service meshes actually behave — what a circuit breaker looks like mid-trip, and what a trace looks like when a downstream service is failing.",
     tags: [
       "gRPC",
       "Protobuf",
