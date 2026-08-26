@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/resume";
 import { caseStudies } from "@/content/case-studies";
+import ProjectHeader from "@/components/case-study/ProjectHeader";
+import DecisionCard from "@/components/case-study/DecisionCard";
 import InteractiveDiagram from "@/components/case-study/InteractiveDiagram";
-import TechDetail from "@/components/case-study/TechDetail";
 import StepThrough from "@/components/case-study/StepThrough";
 import CodeBlock from "@/components/case-study/CodeBlock";
 import Glossary from "@/components/case-study/Glossary";
 import FoundationSection from "@/components/case-study/foundations/FoundationSection";
 import FoundationVisualRenderer from "@/components/case-study/foundations/FoundationVisualRenderer";
+import PaymentCaseStudy from "@/components/case-study/payment/PaymentCaseStudy";
+
+const PAYMENT_SLUG = "payment-processing-backend";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -39,44 +42,21 @@ export default async function ProjectDetailPage({
 }) {
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
+  if (!project) notFound();
+
+  // The payment project gets its own dedicated renderer — see
+  // PaymentCaseStudy.tsx for why. Every other project goes through the
+  // generic CaseStudy template below, unchanged.
+  if (slug === PAYMENT_SLUG) {
+    return <PaymentCaseStudy project={project} />;
+  }
+
   const caseStudy = caseStudies[slug];
-  if (!project || !caseStudy) notFound();
+  if (!caseStudy) notFound();
 
   return (
     <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-      <Link
-        href="/#projects"
-        className="inline-flex items-center gap-1.5 rounded-sm font-mono text-xs uppercase tracking-widest text-zinc-400 transition-colors hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
-      >
-        <span aria-hidden="true">←</span> Back to projects
-      </Link>
-
-      <div className="mt-4 flex justify-end">
-        <a
-          href={project.githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
-        >
-          View on GitHub
-          <span aria-hidden="true">→</span>
-        </a>
-      </div>
-
-      <h1 className="mt-4 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">
-        {project.name}
-      </h1>
-
-      <ul className="mt-4 flex flex-wrap gap-2">
-        {project.tags.map((tag) => (
-          <li
-            key={tag}
-            className="rounded-full border border-zinc-700 px-2.5 py-1 font-mono text-xs text-zinc-400"
-          >
-            {tag}
-          </li>
-        ))}
-      </ul>
+      <ProjectHeader project={project} />
 
       <p className="mt-8 text-lg text-zinc-200">{caseStudy.hook}</p>
 
@@ -127,47 +107,7 @@ export default async function ProjectDetailPage({
         <h2 className={sectionHeading}>Key decisions</h2>
         <div className="mt-4 space-y-8">
           {caseStudy.decisions.map((decision) => (
-            <div
-              key={decision.title}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5"
-            >
-              <h3 className="font-semibold text-zinc-100">
-                {decision.title}
-              </h3>
-              <p className="mt-2 text-zinc-300">{decision.plain}</p>
-              <dl className="mt-3 space-y-2 text-sm">
-                <div>
-                  <dt className="font-mono text-xs uppercase tracking-wide text-zinc-500">
-                    Alternative considered
-                  </dt>
-                  <dd className="mt-0.5 text-zinc-400">
-                    {decision.alternative}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-mono text-xs uppercase tracking-wide text-zinc-500">
-                    Tradeoff
-                  </dt>
-                  <dd className="mt-0.5 text-zinc-400">{decision.tradeoff}</dd>
-                </div>
-                <div>
-                  <dt className="font-mono text-xs uppercase tracking-wide text-zinc-500">
-                    If reversed
-                  </dt>
-                  <dd className="mt-0.5 text-zinc-400">
-                    {decision.ifReversed}
-                  </dd>
-                </div>
-              </dl>
-              {decision.techDetail && (
-                <TechDetail detail={decision.techDetail} />
-              )}
-              {decision.comparisonVisual && (
-                <div className="mt-4">
-                  <FoundationVisualRenderer visual={decision.comparisonVisual} />
-                </div>
-              )}
-            </div>
+            <DecisionCard key={decision.title} decision={decision} />
           ))}
         </div>
       </section>
