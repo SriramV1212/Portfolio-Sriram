@@ -386,7 +386,7 @@ if abstained:
     },
     paragraphs: [
       {
-        text: "Narrow, named tools do two things a generic database client wouldn't: they make every possible tool call enumerable ahead of time, and they let the server enforce shape and behavior (embedding, ranking, payload fields) on every call, rather than trusting the agent to construct a correct query.",
+        text: "Narrow, named tools do two things a generic database client wouldn't: they make every retrieval operation exposed to the agent enumerable ahead of time, and they let the server enforce shape and behavior (embedding, ranking, payload fields) on every call, rather than trusting the agent to construct a correct query.",
       },
     ],
   },
@@ -413,7 +413,7 @@ if abstained:
         { from: "mcp", to: "qdrant" },
       ],
       caption:
-        "FastAPI and the MCP server run as systemd services directly on the VPS (not containerized); only Qdrant runs via Docker Compose. A self-hosted GitHub Actions runner on the same VPS restarts both services and the separately-managed OpenClaw gateway container on every push to main — it never re-runs ingestion, which stays a deliberate manual step.",
+        "FastAPI and the MCP server run as systemd services directly on the VPS (not containerized); only Qdrant runs via Docker Compose. A self-hosted GitHub Actions runner on the same VPS restarts the FastAPI and MCP server systemd services and ensures the separately managed OpenClaw gateway container is running on every deploy — it never re-runs ingestion, which stays a deliberate manual step.",
     },
     paragraphs: [
       {
@@ -623,7 +623,7 @@ app.add_middleware(
     title: "What this project changed in how I think about AI systems",
     paragraphs: [
       {
-        text: "Grounding turned out to be a system property, not a prompt instruction. The strongest guarantee in this project — no direct Qdrant access — comes from what's provisioned to the agent, not from what it's told. The weakest one — verbatim search, correct citation, honoring abstention — is still just an instruction, and testing showed instructions get skipped.",
+        text: "Reliable grounding turned out to be a system property, not just a prompt instruction. The strongest guarantee in this project — no direct Qdrant access — comes from what's provisioned to the agent, not from what it's told. The weakest one — verbatim search, correct citation, honoring abstention — is still just an instruction, and testing showed instructions get skipped.",
       },
       {
         text: "Tool access and model instructions are different kinds of controls, and it's worth being precise about which one is actually doing the work in a given claim. \"The agent can only use these four tools\" is an architectural fact. \"The agent will always cite correctly\" is a hope backed by a system prompt.",
@@ -691,7 +691,7 @@ app.add_middleware(
     {
       term: "Retrieval inspector",
       definition:
-        "The frontend panel showing the actual chunks retrieved for a question, along with their similarity scores and source URLs.",
+        "The frontend panel showing the chunks returned by FastAPI's independent retrieval, along with their similarity scores and source URLs.",
     },
   ],
 };
