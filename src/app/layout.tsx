@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import LoadingScreen from "@/components/LoadingScreen";
+import { personal } from "@/data/resume";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sriram Vivek — AI / Backend Engineer",
-  description:
-    "Portfolio of Sriram Vivek, an AI and backend engineer building RAG systems, event-driven backends, and resilient distributed services.",
+  title: `${personal.name} — ${personal.role}`,
+  description: `Portfolio of ${personal.name}. ${personal.tagline}`,
 };
 
 export default function RootLayout({

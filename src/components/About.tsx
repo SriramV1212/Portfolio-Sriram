@@ -1,4 +1,5 @@
 import { about, experience, featuredSkills } from "@/data/resume";
+import Education from "./Education";
 import SkillsPhysics from "./SkillsPhysics";
 
 export default function About() {
@@ -13,8 +14,10 @@ export default function About() {
         ))}
       </div>
 
+      <Education />
+
       <div className="mt-12">
-        <h3 className="font-mono text-xs uppercase tracking-widest text-zinc-400">
+        <h3 className="font-mono text-sm font-bold uppercase tracking-widest text-emerald-400">
           Experience
         </h3>
         <div className="mt-6 space-y-8 rounded-lg border border-zinc-800 bg-zinc-900/40 p-6">

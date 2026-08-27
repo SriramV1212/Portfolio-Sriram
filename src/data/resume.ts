@@ -1,8 +1,8 @@
 export const personal = {
   name: "Sriram Vivek",
-  role: "AI / Backend Engineer",
+  role: "Software Engineer",
   tagline:
-    "Building reliable backend systems and AI-powered pipelines — from event-driven payment infra to retrieval-augmented agents.",
+    "I build reliable backend and distributed systems, with a focus on correctness, failure handling, and how systems behave beyond the happy path.",
   email: "sriramv1202@gmail.com",
   linkedin: "https://www.linkedin.com/in/sriram-vivek/",
   github: "https://github.com/SriramV1212",
@@ -20,11 +20,11 @@ export const heroPhrases = [
 
 export const about = {
   paragraphs: [
-    "I enjoy building backend systems that hold up under real conditions.",
-    "I've designed a microservices backend with gRPC, adding circuit breakers, mutual TLS, and full OpenTelemetry/Prometheus/Grafana observability to see exactly how the system behaves when things fail, not just when they work. I've also built an event-driven payment processor on Kafka and FastAPI, with idempotent event handling and a dead-letter queue so failures are recoverable instead of silent.",
-    "More recently, I've been getting hands on with AI infrastructure. During my internship at Galatea Associates, I built a retrieval pipeline for a major financial services client, turning a 600-page technical spec into context an LLM could reliably use for narrative generation. I've also built a full retrieval-augmented system from scratch, including a custom MCP server as the sole access layer to the underlying data, and deployed it end to end with containerization and CI/CD.",
-    "I'm looking to apply these skills somewhere I can dig into hard systems problems and make a real impact.",
-    "Feel free to reach out or connect, always happy to talk shop.",
+    "I started out in electrical engineering, switched to computer science, and spent the last couple years building my foundation in software from the ground up. I care about how things actually behave in production, and I try to think through failure scenarios at scale early in the design process. That shows up in a few things I've built on my own:",
+    "My microservices project uses gRPC across three services, with circuit breakers, retries, mutual TLS between services, and OpenTelemetry/Prometheus/Grafana instrumentation so I can actually see how the system behaves when something fails. On my Kafka-based payment system, I built idempotent event handling and a dead-letter queue so a crash mid-transaction stays recoverable and visible.",
+    "I also apply that same mindset to AI systems, specifically how to make them trustworthy in what they retrieve and how they act. At Galatea Associates, I built a retrieval pipeline turning a 600-page technical spec into something an LLM could use reliably. On my own, I built a full RAG system with a custom MCP server as the access layer to the underlying data, deployed and running end to end on a self managed infrastructure.",
+    "Outside of work, I'm a pretty big football (soccer) fan, I like cooking, gaming, and getting outside for sports when I can.",
+    "I'm currently looking for full-time software engineering roles, ideally somewhere I get to work on real infrastructure problems. Feel free to reach out.",
   ],
 };
 
@@ -188,16 +188,19 @@ export type EducationEntry = {
   degree: string;
   dates: string;
   courses: string;
+  logo: string;
 };
 
 export const education: EducationEntry[] = [
   {
     school: "Stony Brook University",
     location: "New York, United States",
-    degree: "Master of Science in Computer Science and Applied Mathematics",
+    degree:
+      "Master of Science in Computer Science and Applied Mathematics (Data Science)",
     dates: "Aug 2024 – May 2026",
     courses:
       "Data Structures and Algorithms, Computer Networks, Programming Abstractions, Theory of Computation, Data Management, Big Data Systems, Big Data Analysis, Probability, Data Analysis, Statistical Learning, Statistical Computing",
+    logo: "/education/stony-brook.png",
   },
   {
     school: "SSN College of Engineering",
@@ -206,5 +209,6 @@ export const education: EducationEntry[] = [
     dates: "Nov 2020 – May 2024",
     courses:
       "Python Programming, Object-Oriented Programming, Linear Algebra and Calculus, Partial Differential Equations",
+    logo: "/education/ssn.svg",
   },
 ];
