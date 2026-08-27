@@ -1,4 +1,4 @@
-import type { Invariant } from "@/content/case-studies/payment/types";
+import type { Invariant } from "@/content/case-studies/types";
 
 const statusStyles: Record<Invariant["status"], { glyph: string; color: string }> = {
   protected: { glyph: "✓", color: "text-emerald-400" },

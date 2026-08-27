@@ -5,18 +5,62 @@ import PaymentArchitectureDiagram from "@/components/case-study/payment/PaymentA
 import CodeBlock from "@/components/case-study/CodeBlock";
 import Glossary from "@/components/case-study/Glossary";
 import PrerequisiteNote from "@/components/case-study/payment/PrerequisiteNote";
-import InvariantPanel from "@/components/case-study/payment/InvariantPanel";
+import InvariantPanel from "@/components/case-study/InvariantPanel";
 import FailureLab from "@/components/case-study/payment/FailureLab";
 import ReliabilitySection from "@/components/case-study/payment/ReliabilitySection";
 import ConsumerScalingLab from "@/components/case-study/payment/ConsumerScalingLab";
 import DualWriteExplorer from "@/components/case-study/payment/DualWriteExplorer";
-import Prose from "@/components/case-study/payment/Prose";
-import TableOfContents from "@/components/case-study/payment/TableOfContents";
-import ScrollToTopButton from "@/components/case-study/payment/ScrollToTopButton";
+import Prose from "@/components/case-study/Prose";
+import TableOfContents from "@/components/case-study/TableOfContents";
+import ScrollToTopButton from "@/components/case-study/ScrollToTopButton";
 import { estimateReadingMinutes } from "@/lib/estimateReadingTime";
+import type { PaymentCaseStudyContent } from "@/content/case-studies/payment/types";
+import { PAYMENT_TERM_PATTERNS } from "@/content/case-studies/payment/termPatterns";
 
 const majorHeading = "text-2xl font-bold text-emerald-400";
 const subHeading = "mt-8 text-xl font-semibold text-zinc-100";
+
+// Flattens this page's actual prose fields into the plain string list the
+// generic reading-time estimator expects — kept local since the shape is
+// specific to this content schema.
+function readingStrings(content: PaymentCaseStudyContent): string[] {
+  return [
+    content.hook,
+    content.subhook,
+    ...content.originStory.map((p) => p.text),
+    content.prerequisiteNote,
+    ...content.invariants.items.map((i) => i.statement),
+    content.architecture.intro,
+    ...content.architecture.pathSteps,
+    content.failureLab.intro,
+    ...content.failureLab.scenarios.flatMap((s) => [
+      s.title,
+      ...s.steps.flatMap((step) => [step.title, step.plain]),
+      ...s.explanation.map((p) => p.text),
+      ...(s.limitation ? [s.limitation] : []),
+    ]),
+    content.reliability.intro,
+    ...content.reliability.subsections.flatMap((sub) => [
+      sub.heading,
+      ...sub.paragraphs.map((p) => p.text),
+    ]),
+    content.consumerScaling.intro,
+    content.consumerScaling.assignmentNote,
+    content.consumerScaling.measuredLabel,
+    content.consumerScaling.disclaimer,
+    content.consumerScaling.takeaway,
+    content.dualWrite.subheading,
+    ...content.dualWrite.paragraphs.map((p) => p.text),
+    content.dualWrite.nextHeading,
+    ...content.dualWrite.nextParagraphs.map((p) => p.text),
+    content.dualWrite.lesson,
+    ...content.decisions.items.flatMap((d) => [d.heading, ...d.paragraphs.map((p) => p.text)]),
+    ...content.codeProof.items.map((c) => c.explanation),
+    ...content.futureWork.items.flatMap((f) => [f.heading, f.text]),
+    ...content.conclusion.paragraphs.map((p) => p.text),
+    ...content.glossary.map((g) => g.definition),
+  ];
+}
 
 // Dedicated renderer for the payment-processing-backend case study —
 // v2, an editorial pass toward a long-form article: text carries the
@@ -46,7 +90,7 @@ export default async function PaymentCaseStudy({ project }: { project: ProjectEn
   // true page order rather than being computed per-section in isolation.
   const usedTerms = new Set<string>();
 
-  const readingMinutes = estimateReadingMinutes(content);
+  const readingMinutes = estimateReadingMinutes(readingStrings(content));
 
   const tocSections = [
     { id: "invariants", label: content.invariants.title },
@@ -71,7 +115,11 @@ export default async function PaymentCaseStudy({ project }: { project: ProjectEn
       <p className="mt-3 text-[1.0625rem] leading-[1.75] text-zinc-200">{content.subhook}</p>
 
       <div className="mt-6">
-        <Prose paragraphs={content.originStory} usedTerms={usedTerms} />
+        <Prose
+          paragraphs={content.originStory}
+          usedTerms={usedTerms}
+          termPatterns={PAYMENT_TERM_PATTERNS}
+        />
       </div>
 
       <div className="mt-8">
@@ -141,7 +189,11 @@ export default async function PaymentCaseStudy({ project }: { project: ProjectEn
           <div key={decision.heading}>
             <h3 className={subHeading}>{decision.heading}</h3>
             <div className="mt-3">
-              <Prose paragraphs={decision.paragraphs} usedTerms={usedTerms} />
+              <Prose
+                paragraphs={decision.paragraphs}
+                usedTerms={usedTerms}
+                termPatterns={PAYMENT_TERM_PATTERNS}
+              />
             </div>
           </div>
         ))}
@@ -175,7 +227,11 @@ export default async function PaymentCaseStudy({ project }: { project: ProjectEn
       <section id="conclusion" className="mt-10 scroll-mt-24">
         <h2 className={majorHeading}>{content.conclusion.title}</h2>
         <div className="mt-4">
-          <Prose paragraphs={content.conclusion.paragraphs} usedTerms={usedTerms} />
+          <Prose
+            paragraphs={content.conclusion.paragraphs}
+            usedTerms={usedTerms}
+            termPatterns={PAYMENT_TERM_PATTERNS}
+          />
         </div>
       </section>
 

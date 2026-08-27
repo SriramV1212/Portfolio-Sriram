@@ -11,8 +11,10 @@ import Glossary from "@/components/case-study/Glossary";
 import FoundationSection from "@/components/case-study/foundations/FoundationSection";
 import FoundationVisualRenderer from "@/components/case-study/foundations/FoundationVisualRenderer";
 import PaymentCaseStudy from "@/components/case-study/payment/PaymentCaseStudy";
+import GrpcCaseStudy from "@/components/case-study/grpc/GrpcCaseStudy";
 
 const PAYMENT_SLUG = "payment-processing-backend";
+const GRPC_SLUG = "microservices-resilience-engine";
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -44,11 +46,15 @@ export default async function ProjectDetailPage({
   const project = projects.find((p) => p.slug === slug);
   if (!project) notFound();
 
-  // The payment project gets its own dedicated renderer — see
-  // PaymentCaseStudy.tsx for why. Every other project goes through the
-  // generic CaseStudy template below, unchanged.
+  // The payment and gRPC projects each get their own dedicated renderer —
+  // see PaymentCaseStudy.tsx / GrpcCaseStudy.tsx for why. The remaining
+  // project (agentic-rag-system) goes through the generic CaseStudy
+  // template below, unchanged.
   if (slug === PAYMENT_SLUG) {
     return <PaymentCaseStudy project={project} />;
+  }
+  if (slug === GRPC_SLUG) {
+    return <GrpcCaseStudy project={project} />;
   }
 
   const caseStudy = caseStudies[slug];

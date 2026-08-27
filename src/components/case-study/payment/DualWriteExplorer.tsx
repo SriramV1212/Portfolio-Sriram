@@ -1,5 +1,6 @@
 import type { DualWrite } from "@/content/case-studies/payment/types";
-import Prose from "./Prose";
+import { PAYMENT_TERM_PATTERNS } from "@/content/case-studies/payment/termPatterns";
+import Prose from "@/components/case-study/Prose";
 
 const subHeading = "mt-8 text-xl font-semibold text-zinc-100";
 
@@ -23,7 +24,11 @@ export default function DualWriteExplorer({
       </pre>
 
       <div className="mt-4">
-        <Prose paragraphs={dualWrite.paragraphs} usedTerms={usedTerms} />
+        <Prose
+          paragraphs={dualWrite.paragraphs}
+          usedTerms={usedTerms}
+          termPatterns={PAYMENT_TERM_PATTERNS}
+        />
       </div>
 
       <div className="mt-8 flex items-center gap-2">
@@ -38,7 +43,11 @@ export default function DualWriteExplorer({
       </pre>
 
       <div className="mt-4">
-        <Prose paragraphs={dualWrite.nextParagraphs} usedTerms={usedTerms} />
+        <Prose
+          paragraphs={dualWrite.nextParagraphs}
+          usedTerms={usedTerms}
+          termPatterns={PAYMENT_TERM_PATTERNS}
+        />
       </div>
 
       <p className="mt-6 border-l-2 border-emerald-800 pl-3 text-lg text-zinc-100">

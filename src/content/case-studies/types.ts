@@ -101,6 +101,26 @@ export type GlossaryTerm = {
   definition: string;
 };
 
+// Article-prose primitives shared across every dedicated (non-generic)
+// case-study renderer — first introduced for the payment write-up, now
+// reused as-is by any project that needs the same long-form article feel.
+export type ProseParagraph = { label?: string; text: string };
+
+export type Invariant = {
+  statement: string;
+  status: "protected" | "gap";
+  statusLabel: string;
+};
+
+// A "decision worth explaining" told as plain flowing prose (an unlabeled
+// "why" paragraph, then usually one labeled "Alternative considered" and
+// one labeled "Tradeoff") instead of a bordered dl-style card — the blog-
+// article treatment established for the payment write-up's decisions.
+export type DecisionNarrative = {
+  heading: string;
+  paragraphs: ProseParagraph[];
+};
+
 export type CaseStudy = {
   hook: string;
   foundations: FoundationConcept[];

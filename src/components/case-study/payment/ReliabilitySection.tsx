@@ -1,5 +1,6 @@
 import type { ReliabilitySubsection } from "@/content/case-studies/payment/types";
-import Prose from "./Prose";
+import { PAYMENT_TERM_PATTERNS } from "@/content/case-studies/payment/termPatterns";
+import Prose from "@/components/case-study/Prose";
 
 const subHeading = "mt-8 text-xl font-semibold text-zinc-100";
 
@@ -20,7 +21,11 @@ export default function ReliabilitySection({
         <div key={item.heading}>
           <h3 className={subHeading}>{item.heading}</h3>
           <div className="mt-3">
-            <Prose paragraphs={item.paragraphs.slice(0, 1)} usedTerms={usedTerms} />
+            <Prose
+              paragraphs={item.paragraphs.slice(0, 1)}
+              usedTerms={usedTerms}
+              termPatterns={PAYMENT_TERM_PATTERNS}
+            />
           </div>
 
           {item.codeBad && (
@@ -72,7 +77,11 @@ export default function ReliabilitySection({
 
           {item.paragraphs.length > 1 && (
             <div className="mt-4">
-              <Prose paragraphs={item.paragraphs.slice(1)} usedTerms={usedTerms} />
+              <Prose
+                paragraphs={item.paragraphs.slice(1)}
+                usedTerms={usedTerms}
+                termPatterns={PAYMENT_TERM_PATTERNS}
+              />
             </div>
           )}
         </div>

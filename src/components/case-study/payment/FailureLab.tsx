@@ -5,7 +5,7 @@ import type { FailureScenario } from "@/content/case-studies/payment/types";
 import StepThrough from "@/components/case-study/StepThrough";
 import Timeline from "@/components/case-study/visuals/Timeline";
 import PipelineFlow from "@/components/case-study/visuals/PipelineFlow";
-import Prose from "./Prose";
+import Prose from "@/components/case-study/Prose";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";

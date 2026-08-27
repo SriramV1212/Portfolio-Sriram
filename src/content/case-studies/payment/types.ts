@@ -8,14 +8,21 @@
 // type already fits (CodeSnippet, GlossaryTerm, the architecture-diagram
 // shapes, FlowStep, and the visual-primitive prop types), it's reused
 // rather than redefined.
-import type { CodeSnippet, GlossaryTerm, FlowStep } from "../types";
+import type {
+  CodeSnippet,
+  GlossaryTerm,
+  FlowStep,
+  ProseParagraph,
+  Invariant,
+  DecisionNarrative,
+} from "../types";
 import type { TimelineSegment } from "@/components/case-study/visuals/Timeline";
 import type {
   PipelineNode,
   PipelineEdge,
 } from "@/components/case-study/visuals/PipelineFlow";
 
-export type ProseParagraph = { label?: string; text: string };
+export type { ProseParagraph, Invariant };
 
 // The illustrated architecture diagram — icons, multi-line labels, and a
 // step-by-step request trace. Distinct from the generic `DiagramNode`/
@@ -54,12 +61,6 @@ export type ArchitectureDiagram = {
   nodes: ArchNode[];
   edges: ArchEdge[];
   trace: ArchTraceStep[];
-};
-
-export type Invariant = {
-  statement: string;
-  status: "protected" | "gap";
-  statusLabel: string;
 };
 
 export type ScenarioVisual =
@@ -132,10 +133,7 @@ export type DualWrite = {
   lesson: string;
 };
 
-export type DecisionNarrative = {
-  heading: string;
-  paragraphs: ProseParagraph[];
-};
+export type { DecisionNarrative };
 
 export type FutureWorkItem = { heading: string; text: string };
 

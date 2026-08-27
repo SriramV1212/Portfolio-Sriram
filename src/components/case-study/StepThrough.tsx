@@ -32,15 +32,21 @@ export default function StepThrough({ steps }: { steps: FlowStep[] }) {
         </span>
       </div>
 
-      <h4 className="mt-4 text-lg font-semibold text-zinc-100">
-        {step.title}
-      </h4>
-      <p className="mt-2 text-zinc-300">{step.plain}</p>
-      {step.detail && (
-        <p className="mt-2 font-mono text-xs leading-relaxed text-zinc-500">
-          {step.detail}
-        </p>
-      )}
+      {/* Fixed min-height + overflow-y-auto safety net, same fix as the
+          architecture diagram's trace caption box — step content length
+          varies, and without this the Prev/Next row shifts vertically on
+          every click, moving the target out from under the user's cursor. */}
+      <div className="min-h-[9.5rem] overflow-y-auto sm:min-h-[7.5rem]">
+        <h4 className="mt-4 text-lg font-semibold text-zinc-100">
+          {step.title}
+        </h4>
+        <p className="mt-2 text-zinc-300">{step.plain}</p>
+        {step.detail && (
+          <p className="mt-2 font-mono text-xs leading-relaxed text-zinc-500">
+            {step.detail}
+          </p>
+        )}
+      </div>
 
       <div className="mt-6 flex items-center justify-between">
         <button
