@@ -43,9 +43,15 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
       },
       {
         statement:
-          "Every service-to-service hop should be mutually authenticated and encrypted.",
+          "Backend-to-backend hops (Orchestrator→User, Orchestrator→Search) are mutually authenticated and encrypted.",
+        status: "protected",
+        statusLabel: "Protected",
+      },
+      {
+        statement:
+          "The client-facing Orchestrator edge (Client→Orchestrator) is encrypted and authenticated.",
         status: "gap",
-        statusLabel: "2 of 3 edges",
+        statusLabel: "Known gap",
       },
       {
         statement:
@@ -159,9 +165,9 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
           "Once the cooldown passes, the next call is let through as a single HALF_OPEN probe. Success fully resets the breaker; another failure reopens it immediately without incrementing the failure count again.",
       },
       {
-        title: "What shows up in Jaeger and Grafana afterward",
+        title: "What this would look like in Jaeger and Grafana",
         plain:
-          "A cluster of failed BookFlight traces right as the breaker trips, followed by a run of unusually fast failures with no real backend latency — because Search isn't actually being called during that stretch at all.",
+          "A cluster of failed BookFlight traces around the moment the breaker trips, then a run of unusually fast failures with no backend latency in them — a direct, logical consequence of the breaker rejecting calls before they ever reach Search, and exactly the kind of pattern this observability setup is built to surface.",
       },
     ],
   },
@@ -188,7 +194,10 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
         text: "Metrics and traces answer different questions. A Grafana dashboard tells you that something changed — an error rate or a latency percentile moved. A Jaeger trace tells you which specific hop, on which specific request, actually slowed down or failed, and in what order.",
       },
       {
-        text: "That distinction is exactly what made the circuit-breaker scenario above legible instead of mysterious: Grafana showed the error-rate and latency graphs change shape right when the breaker tripped, and Jaeger showed individual traces change from one long failed span calling Search into several near-instant rejected spans — the visual signature of a breaker sitting open, not just a slower backend.",
+        text: "This setup makes those changes observable: Grafana can surface changes in latency, error rate, and throughput, while Jaeger can show where an individual request spent time and whether downstream calls were executed at all — the difference between a request that failed after actually reaching Search and one the breaker rejected before it ever left the Orchestrator.",
+      },
+      {
+        text: "When Search is failing, these tools make it easier to correlate service-level symptoms with the path taken by a specific request, instead of reasoning about the failure from logs alone.",
       },
       {
         text: "One honest asymmetry: the observability stack (Prometheus, Grafana, Jaeger) runs through Docker Compose, but the three gRPC services themselves currently run as local Python processes, not containers.",
@@ -227,7 +236,7 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
         heading: "Why Search is the protected dependency",
         paragraphs: [
           {
-            text: "Search is the one call deliberately built with a failure switch, and the one that does real, variable work (a lookup, or a stream of results over time) rather than a single boolean check — the more realistic place for a downstream dependency to actually degrade.",
+            text: "Search is the one call deliberately built with a failure switch, and it's the dependency that sits on both the normal lookup path (SearchFlights, which returns a fixed flight list) and the streaming path (StreamFlightPrices, which produces changing prices over the stream) — a more realistic dependency to stress than a single boolean check, even though neither call is backed by a real search engine or datastore.",
           },
         ],
       },
@@ -265,15 +274,15 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
           },
           {
             label: "Tradeoff",
-            text: "A .proto contract catches shape mismatches at compile time and produces smaller payloads over HTTP/2, at the cost of codegen tooling and losing the \"just open it in a browser or curl it\" debuggability plain JSON has.",
+            text: "The shared protobuf schema and generated stubs reduce contract drift and make incompatible message shapes explicit earlier, and HTTP/2 gives the streaming call somewhere Python doesn't have to build itself — at the cost of codegen tooling and losing the \"just open it in a browser or curl it\" debuggability plain JSON has.",
           },
         ],
       },
       {
-        heading: "A hand-rolled circuit breaker, applied to Search only",
+        heading: "Why hand-roll the circuit breaker?",
         paragraphs: [
           {
-            text: "The circuit breaker is plain Python, about 40 lines, tracking its own state: 3 consecutive failures trips it open, with a 10-second cooldown before a HALF_OPEN probe. It's applied only to the call to Search — not User validation, not the streaming price feed — since Search is the dependency deliberately made flaky for testing.",
+            text: "I implemented the breaker directly, in plain Python, because I wanted to understand the state transitions myself and see exactly how it interacts with retries, rather than hide that behavior behind a library. It's scoped to the Search call only — not User validation, not the streaming price feed — since Search is the dependency deliberately made flaky for testing (the exact thresholds and states are covered above).",
           },
           {
             label: "Alternative considered",
@@ -281,15 +290,15 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
           },
           {
             label: "Tradeoff",
-            text: "Hand-rolling makes the exact behavior easy to see and reason about — including a real edge case worth naming: a failed HALF_OPEN probe doesn't double-count against the threshold, it just re-opens using the count already there — at the cost of missing edge cases a mature library would already handle.",
+            text: "A custom implementation is easier to inspect but lacks the maturity, edge-case coverage, and configurability of a production resilience library.",
           },
         ],
       },
       {
-        heading: "Retry wraps the circuit breaker, not the other way around",
+        heading: "Why retry wraps the circuit breaker, not the other way around",
         paragraphs: [
           {
-            text: "Each of the retry loop's up-to-3 attempts calls through the circuit breaker fresh, so the breaker's state is re-checked on every attempt rather than once before the whole sequence starts.",
+            text: "I structured the retry loop to call through the circuit breaker fresh on every attempt, rather than check it once up front, because I wanted a request's own retries to be able to trip the breaker mid-sequence — a scenario the walkthrough above shows directly.",
           },
           {
             label: "Alternative considered",
@@ -297,15 +306,15 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
           },
           {
             label: "Tradeoff",
-            text: "As built, a request can genuinely be the one whose own retries trip the breaker mid-sequence, which is realistic. The cost, seen directly in the failure walkthrough above: once open, a request still burns through all 3 attempts and their waits even though each is destined to fail instantly — checking once up front would fail faster, but a request could no longer be the one whose own retries trip the breaker.",
+            text: "Checking once up front would fail faster once the breaker is already known to be open, at the cost of a request no longer being able to be the one whose own retries trip it.",
           },
         ],
       },
       {
-        heading: "mTLS secures the two inter-service hops, not the client-facing edge",
+        heading: "Why mTLS only on the two hops the Orchestrator initiates",
         paragraphs: [
           {
-            text: "Both Orchestrator→User and Orchestrator→Search require both sides to present a valid certificate — the Orchestrator's outbound clients use mTLS channel credentials with a required client certificate. The connection into the Orchestrator itself has none of that; it binds its inbound port with an insecure server credential.",
+            text: "I scoped mTLS to the two hops the Orchestrator itself initiates (User, Search) because backend-to-backend trust was specifically what this project set out to explore — the invariants above call out the client-facing edge as the known gap rather than smoothing over it.",
           },
           {
             label: "Alternative considered",
@@ -313,7 +322,7 @@ export const grpcCaseStudy: GrpcCaseStudyContent = {
           },
           {
             label: "Tradeoff",
-            text: "This project explored backend-to-backend trust specifically. In a real deployment, the client-facing edge would typically sit behind its own protection — a load balancer or API gateway — which this project doesn't include; securing every hop would close this gap entirely, it just wasn't what got built here.",
+            text: "In a real deployment, the client-facing edge would typically sit behind its own protection — a load balancer or API gateway — which this project doesn't include; securing every hop would close this gap entirely, it just wasn't what got built here.",
           },
         ],
       },
