@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type {
-  ArchitectureDiagram,
-  ArchNode,
-} from "@/content/case-studies/payment/types";
+import type { ArchitectureDiagram, ArchNode } from "@/content/case-studies/types";
 import ArchitectureIconPaths from "./architecture-icons";
 
 const NODE_W = 200;
@@ -55,7 +52,12 @@ function boxEdgePoint(cx: number, cy: number, hw: number, hh: number, dx: number
   return { x: cx + dx * t, y: cy + dy * t };
 }
 
-export default function PaymentArchitectureDiagram({
+// Shared, click-through-traceable architecture diagram — icons, multi-line
+// labels, parallel/bidirectional edges, and a Prev/Next/Reset request
+// trace. Originally built only for the payment write-up
+// (PaymentArchitectureDiagram.tsx); promoted here, unchanged, once the RAG
+// write-up needed the exact same interaction over its own node/edge data.
+export default function TracedArchitectureDiagram({
   diagram,
 }: {
   diagram: ArchitectureDiagram;

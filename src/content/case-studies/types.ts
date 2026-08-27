@@ -121,6 +121,66 @@ export type DecisionNarrative = {
   paragraphs: ProseParagraph[];
 };
 
+// A framed static image (Figure.tsx) — first introduced for the gRPC
+// write-up's two embedded diagrams, reused as-is by the RAG write-up's
+// architecture figure.
+export type FigureAsset = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  caption?: string;
+};
+
+// The illustrated, click-through-traceable architecture diagram
+// (TracedArchitectureDiagram.tsx) — icons, multi-line labels, parallel/
+// bidirectional edges, and a step-by-step request trace. First built for
+// the payment write-up, promoted here once the RAG write-up became a
+// second consumer. Distinct from the generic `DiagramNode`/`DiagramEdge`
+// click-to-inspect diagram (InteractiveDiagram.tsx), which doesn't support
+// icons or a trace.
+export type ArchIconKind =
+  | "monitor"
+  | "braces"
+  | "database"
+  | "kafka"
+  | "gear"
+  | "tray"
+  | "user"
+  | "robot"
+  | "plug";
+
+export type ArchNode = {
+  id: string;
+  label: string[];
+  icon: ArchIconKind;
+  color: string;
+  x: number;
+  y: number;
+};
+
+export type ArchEdge = {
+  id: string;
+  from: string;
+  to: string;
+  label: string[];
+  dashed?: boolean;
+  parallelOffset?: number;
+};
+
+export type ArchTraceStep = {
+  caption: string;
+  nodeIds: string[];
+  edgeIds: string[];
+};
+
+export type ArchitectureDiagram = {
+  viewBox: string;
+  nodes: ArchNode[];
+  edges: ArchEdge[];
+  trace: ArchTraceStep[];
+};
+
 export type CaseStudy = {
   hook: string;
   foundations: FoundationConcept[];

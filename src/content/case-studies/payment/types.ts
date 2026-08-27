@@ -15,6 +15,11 @@ import type {
   ProseParagraph,
   Invariant,
   DecisionNarrative,
+  ArchIconKind,
+  ArchNode,
+  ArchEdge,
+  ArchTraceStep,
+  ArchitectureDiagram,
 } from "../types";
 import type { TimelineSegment } from "@/components/case-study/visuals/Timeline";
 import type {
@@ -24,44 +29,12 @@ import type {
 
 export type { ProseParagraph, Invariant };
 
-// The illustrated architecture diagram — icons, multi-line labels, and a
-// step-by-step request trace. Distinct from the generic `DiagramNode`/
-// `DiagramEdge` shapes used by the other two projects' InteractiveDiagram,
-// since this one needs icons, multi-line labels, and parallel edges
-// between the same two nodes (Kafka <-> Consumer), none of which the
-// generic click-to-inspect diagram was designed for.
-export type ArchIconKind = "monitor" | "braces" | "database" | "kafka" | "gear" | "tray";
-
-export type ArchNode = {
-  id: string;
-  label: string[];
-  icon: ArchIconKind;
-  color: string;
-  x: number;
-  y: number;
-};
-
-export type ArchEdge = {
-  id: string;
-  from: string;
-  to: string;
-  label: string[];
-  dashed?: boolean;
-  parallelOffset?: number;
-};
-
-export type ArchTraceStep = {
-  caption: string;
-  nodeIds: string[];
-  edgeIds: string[];
-};
-
-export type ArchitectureDiagram = {
-  viewBox: string;
-  nodes: ArchNode[];
-  edges: ArchEdge[];
-  trace: ArchTraceStep[];
-};
+// The illustrated architecture diagram type — icons, multi-line labels,
+// and a step-by-step request trace — now lives in the shared
+// content/case-studies/types.ts (promoted once the RAG write-up became a
+// second consumer of the same diagram shape/component). Re-exported here
+// so nothing importing from this path needs to change.
+export type { ArchIconKind, ArchNode, ArchEdge, ArchTraceStep, ArchitectureDiagram };
 
 export type ScenarioVisual =
   | {

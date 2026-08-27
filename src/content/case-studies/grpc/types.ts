@@ -16,15 +16,10 @@ import type {
   ProseParagraph,
   Invariant,
   DecisionNarrative,
+  FigureAsset,
 } from "../types";
 
-export type FigureAsset = {
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
-  caption?: string;
-};
+export type { FigureAsset };
 
 export type ReliabilityTopic = {
   heading: string;

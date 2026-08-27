@@ -1,7 +1,7 @@
 import type { ProjectEntry } from "@/data/resume";
 import { paymentCaseStudy } from "@/content/case-studies/payment/content";
 import ProjectHeader from "@/components/case-study/ProjectHeader";
-import PaymentArchitectureDiagram from "@/components/case-study/payment/PaymentArchitectureDiagram";
+import TracedArchitectureDiagram from "@/components/case-study/TracedArchitectureDiagram";
 import CodeBlock from "@/components/case-study/CodeBlock";
 import Glossary from "@/components/case-study/Glossary";
 import PrerequisiteNote from "@/components/case-study/payment/PrerequisiteNote";
@@ -137,7 +137,7 @@ export default async function PaymentCaseStudy({ project }: { project: ProjectEn
         <h2 className={majorHeading}>{content.architecture.title}</h2>
         <p className="mt-4 text-sm text-zinc-400">{content.architecture.intro}</p>
         <div className="mt-4">
-          <PaymentArchitectureDiagram diagram={content.architecture.diagram} />
+          <TracedArchitectureDiagram diagram={content.architecture.diagram} />
         </div>
         <ol className="mt-6 list-decimal space-y-3 pl-5 marker:text-zinc-500">
           {content.architecture.pathSteps.map((step, i) => (
