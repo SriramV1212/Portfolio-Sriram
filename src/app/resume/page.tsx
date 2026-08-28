@@ -8,7 +8,7 @@ import {
 
 export default function ResumePage() {
   return (
-    <main className="mx-auto min-w-0 max-w-4xl flex-1 px-6 py-16">
+    <main className="mx-auto w-full min-w-0 max-w-4xl flex-1 px-6 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-zinc-50">

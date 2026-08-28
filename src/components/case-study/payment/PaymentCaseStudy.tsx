@@ -106,7 +106,7 @@ export default async function PaymentCaseStudy({ project }: { project: ProjectEn
   ];
 
   return (
-    <main className="mx-auto min-w-0 max-w-[46rem] flex-1 px-6 pb-16 pt-28 2xl:pt-16">
+    <main className="mx-auto w-full min-w-0 max-w-[46rem] flex-1 px-6 pb-16 pt-28 2xl:pt-16">
       <TableOfContents sections={tocSections} readingMinutes={readingMinutes} />
       <ScrollToTopButton />
       <ProjectHeader project={project} />
