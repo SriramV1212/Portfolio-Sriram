@@ -66,7 +66,7 @@ export default async function ProjectDetailPage({
   if (!caseStudy) notFound();
 
   return (
-    <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
+    <main className="mx-auto min-w-0 max-w-3xl flex-1 px-6 py-16">
       <ProjectHeader project={project} />
 
       <p className="mt-8 text-lg text-zinc-200">{caseStudy.hook}</p>

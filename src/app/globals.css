@@ -7,7 +7,7 @@
 
 html {
   color-scheme: dark;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Safety net, not the primary fix: individual wide elements (the
@@ -15,9 +15,22 @@ html {
    container so they stay legible on mobile instead of shrinking to
    illegible text — see TracedArchitectureDiagram.tsx / PipelineFlow.tsx
    etc. This just guarantees that if anything is ever missed, it can't
-   push the whole page sideways. */
+   push the whole page sideways.
+
+   overflow-x: clip, not hidden: setting overflow-x to a non-visible
+   value on an element without also setting overflow-y makes the browser
+   auto-promote overflow-y to "auto" too (a real CSS spec quirk, and one
+   this project has been bitten by before — see the nav <ul> shadow-
+   clipping entry above). Doing that on BOTH html and body independently
+   turned each into its own scroll container, which broke position:sticky
+   for Nav's header (its "nearest scrolling ancestor" became ambiguous) —
+   confirmed live on a phone: the sticky header vanished on scroll and the
+   new mobile reading-progress bar (docked relative to it) ended up
+   overlapping page content instead. `clip` doesn't establish a scroll
+   container and isn't paired with the other axis by that quirk, so it
+   clips horizontal overflow without any of this side effect. */
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: no-preference) {

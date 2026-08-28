@@ -13,7 +13,7 @@ const navLinkClass = `rounded-sm transition-colors hover:text-zinc-100 ${focusRi
 
 export default function Nav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur">
+    <header className="sticky top-0 z-50 min-w-0 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur">
       <nav
         aria-label="Primary"
         className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-6 text-sm"
