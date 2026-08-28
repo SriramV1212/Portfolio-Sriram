@@ -91,7 +91,7 @@ export default function RagCaseStudy({ project }: { project: ProjectEntry }) {
   ];
 
   return (
-    <main className="mx-auto max-w-[46rem] flex-1 px-6 py-16">
+    <main className="mx-auto max-w-[46rem] flex-1 px-6 pb-16 pt-28 2xl:pt-16">
       <TableOfContents sections={tocSections} readingMinutes={readingMinutes} />
       <ScrollToTopButton />
       <ProjectHeader project={project} />

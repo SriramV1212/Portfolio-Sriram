@@ -1,6 +1,7 @@
 import { about, experience, featuredSkills } from "@/data/resume";
 import Education from "./Education";
 import SkillsPhysics from "./SkillsPhysics";
+import ReadMore from "./ReadMore";
 
 export default function About() {
   return (
@@ -8,10 +9,14 @@ export default function About() {
       <h2 className="font-mono text-sm font-bold uppercase tracking-widest text-emerald-400">
         About
       </h2>
-      <div className="mt-4 space-y-4 text-zinc-300">
-        {about.paragraphs.map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
-        ))}
+      <div className="mt-4 text-zinc-300">
+        <ReadMore>
+          <div className="space-y-4">
+            {about.paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+        </ReadMore>
       </div>
 
       <Education />
@@ -36,11 +41,15 @@ export default function About() {
                 </span>
               </div>
               <p className="text-sm text-zinc-400">{entry.location}</p>
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-zinc-300">
-                {entry.bullets.map((bullet, i) => (
-                  <li key={i}>{bullet}</li>
-                ))}
-              </ul>
+              <div className="mt-3 text-zinc-300">
+                <ReadMore>
+                  <ul className="list-disc space-y-2 pl-5">
+                    {entry.bullets.map((bullet, i) => (
+                      <li key={i}>{bullet}</li>
+                    ))}
+                  </ul>
+                </ReadMore>
+              </div>
             </div>
           ))}
         </div>

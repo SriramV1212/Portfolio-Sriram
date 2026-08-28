@@ -69,7 +69,22 @@ export default function TableOfContents({
   const [justCelebrated, setJustCelebrated] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [sparks, setSparks] = useState<Spark[]>([]);
+  const [navHeight, setNavHeight] = useState(0);
   const reducedMotion = useReducedMotion();
+
+  // The site's own sticky header (<header>, see Nav.tsx) sits above
+  // everything below 2xl, where the sidebar version of this component is
+  // hidden. Rather than guess its height as a fixed Tailwind class (fragile
+  // against font/padding changes), measure it directly so the mobile/
+  // tablet progress bar always docks exactly beneath it instead of
+  // overlapping or leaving a gap.
+  useEffect(() => {
+    const header = document.querySelector("header");
+    const update = () => setNavHeight(header?.getBoundingClientRect().height ?? 0);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   const alreadyCelebrated = useSyncExternalStore(
     subscribeCelebrated,
@@ -129,65 +144,97 @@ export default function TableOfContents({
     };
   }, [reducedMotion]);
 
+  const progressBarFill = (
+    <div
+      className={`h-full rounded-full transition-[width] duration-150 ${
+        hasCelebrated
+          ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+          : "bg-emerald-500"
+      } ${showCelebration ? "progress-celebrate" : ""}`}
+      style={{ width: `${progress}%` }}
+    />
+  );
+
+  const sparkLayer = showCelebration && sparks.length > 0 && (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-visible">
+      {sparks.map((s) => (
+        <span
+          key={s.id}
+          className="spark-particle absolute rounded-full"
+          style={
+            {
+              left: `${s.leftPct}%`,
+              top: "50%",
+              width: s.size,
+              height: s.size,
+              backgroundColor: s.color,
+              animationDelay: `${s.delay}ms`,
+              "--tx": `${s.tx}px`,
+              "--ty": `${s.ty}px`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+
   return (
-    <nav aria-label="Table of contents" className="fixed left-8 top-32 hidden w-64 2xl:block">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="font-mono text-xs uppercase tracking-widest text-zinc-500">
-          Reading progress
-        </p>
-        <p className="shrink-0 font-mono text-xs text-zinc-500">{readingMinutes} min read</p>
-      </div>
-      <div className="relative mt-2 h-1 w-full">
-        <div className="h-full w-full overflow-hidden rounded-full bg-zinc-800">
-          <div
-            className={`h-full rounded-full transition-[width] duration-150 ${
-              hasCelebrated
-                ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
-                : "bg-emerald-500"
-            } ${showCelebration ? "progress-celebrate" : ""}`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        {showCelebration && sparks.length > 0 && (
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-visible">
-            {sparks.map((s) => (
-              <span
-                key={s.id}
-                className="spark-particle absolute rounded-full"
-                style={
-                  {
-                    left: `${s.leftPct}%`,
-                    top: "50%",
-                    width: s.size,
-                    height: s.size,
-                    backgroundColor: s.color,
-                    animationDelay: `${s.delay}ms`,
-                    "--tx": `${s.tx}px`,
-                    "--ty": `${s.ty}px`,
-                  } as CSSProperties
-                }
-              />
-            ))}
+    <>
+      {/* Mobile/tablet (and any window narrower than 2xl): the full
+          sidebar below has nowhere to go, so this is a slim progress-only
+          bar docked directly beneath the site's sticky header — same
+          progress/celebration state as the sidebar version, just a
+          different, space-constrained presentation. Read time and the
+          section list are deliberately left off here; there's no room for
+          them at this width without covering content. */}
+      <div
+        className="fixed inset-x-0 z-40 border-b border-zinc-800 bg-zinc-950/90 px-4 py-1.5 backdrop-blur 2xl:hidden"
+        style={{ top: navHeight }}
+      >
+        <div className="mx-auto flex max-w-[46rem] items-center gap-3">
+          <p className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+            {readingMinutes} min
+          </p>
+          <div className="relative h-1 w-full">
+            <div className="h-full w-full overflow-hidden rounded-full bg-zinc-800">
+              {progressBarFill}
+            </div>
+            {sparkLayer}
           </div>
-        )}
+        </div>
       </div>
 
-      <p className="mt-6 text-sm font-semibold text-zinc-100">On this page</p>
-      <ul className="mt-3 space-y-2.5 border-l border-zinc-800 pl-4">
-        {sections.map((s) => (
-          <li key={s.id}>
-            <a
-              href={`#${s.id}`}
-              aria-current={activeId === s.id ? "true" : undefined}
-              className={`block rounded-sm text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                activeId === s.id ? "font-medium text-emerald-400" : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              {s.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+      <nav aria-label="Table of contents" className="fixed left-8 top-32 hidden w-64 2xl:block">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="font-mono text-xs uppercase tracking-widest text-zinc-500">
+            Reading progress
+          </p>
+          <p className="shrink-0 font-mono text-xs text-zinc-500">{readingMinutes} min read</p>
+        </div>
+        <div className="relative mt-2 h-1 w-full">
+          <div className="h-full w-full overflow-hidden rounded-full bg-zinc-800">
+            {progressBarFill}
+          </div>
+          {sparkLayer}
+        </div>
+
+        <p className="mt-6 text-sm font-semibold text-zinc-100">On this page</p>
+        <ul className="mt-3 space-y-2.5 border-l border-zinc-800 pl-4">
+          {sections.map((s) => (
+            <li key={s.id}>
+              <a
+                href={`#${s.id}`}
+                aria-current={activeId === s.id ? "true" : undefined}
+                className={`block rounded-sm text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                  activeId === s.id ? "font-medium text-emerald-400" : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import {
   StarDoodle,
 } from "./Doodles";
 import Typewriter from "./Typewriter";
+import ReadMore from "./ReadMore";
 
 export default function Hero() {
   return (
@@ -23,7 +24,11 @@ export default function Hero() {
           <Typewriter phrases={heroPhrases} />
           <span className="text-zinc-500"> {"/>"}</span>
         </p>
-        <p className="mt-6 max-w-md text-zinc-400">{personal.tagline}</p>
+        <div className="mt-6 max-w-md text-zinc-400">
+          <ReadMore>
+            <p>{personal.tagline}</p>
+          </ReadMore>
+        </div>
       </div>
 
       <div className="relative h-[min(18rem,80vw)] w-[min(18rem,80vw)] shrink-0 sm:h-80 sm:w-80">
