@@ -41,12 +41,17 @@ export default function Timeline({
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <svg
-        viewBox={`0 0 ${VIEW_W} 90`}
-        className="h-auto w-full"
-        role="img"
-        aria-label={caption ?? "Timeline"}
-      >
+      {/* min-w matches this component's own natural VIEW_W, so mobile
+          never renders it smaller than it already does today — it just
+          scrolls horizontally instead of shrinking the segment labels
+          past legibility. */}
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${VIEW_W} 90`}
+          className="h-auto w-full min-w-[640px]"
+          role="img"
+          aria-label={caption ?? "Timeline"}
+        >
         <line
           x1={PAD}
           y1={TRACK_Y + TRACK_H / 2}
@@ -113,7 +118,8 @@ export default function Timeline({
             </g>
           );
         })}
-      </svg>
+        </svg>
+      </div>
 
       <div className="mt-3 rounded-md border border-zinc-800 bg-zinc-950/60 p-3">
         {selectedSegment ? (

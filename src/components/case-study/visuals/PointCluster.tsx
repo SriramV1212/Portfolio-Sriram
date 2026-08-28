@@ -40,12 +40,13 @@ export default function PointCluster({
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <svg
-        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-        className="h-auto w-full"
-        role="img"
-        aria-label={caption ?? "Points clustered by meaning"}
-      >
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+          className="h-auto w-full min-w-[300px]"
+          role="img"
+          aria-label={caption ?? "Points clustered by meaning"}
+        >
         {selectedPoint &&
           relatedIds &&
           Array.from(relatedIds).map((id) => {
@@ -118,7 +119,8 @@ export default function PointCluster({
             </g>
           );
         })}
-      </svg>
+        </svg>
+      </div>
 
       <div className="mt-3 rounded-md border border-zinc-800 bg-zinc-950/60 p-3">
         {selectedPoint ? (

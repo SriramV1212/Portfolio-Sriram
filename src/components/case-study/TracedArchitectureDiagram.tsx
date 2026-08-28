@@ -78,16 +78,23 @@ export default function TracedArchitectureDiagram({
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <svg
-        viewBox={diagram.viewBox}
-        className="h-auto w-full"
-        role="img"
-        aria-label={
-          active
-            ? `Architecture diagram, showing step ${stepIndex! + 1} of ${trace.length}: ${active.caption}`
-            : "Architecture diagram of the payment pipeline"
-        }
-      >
+      {/* This is the widest, most text-dense diagram on the site (up to
+          ~1600 viewBox units), so a plain w-full would shrink its labels
+          to a few px on a phone. min-w-[720px] keeps it at roughly its
+          normal desktop render size and lets the SVG itself scroll
+          horizontally on mobile instead — the Prev/Next/Reset controls
+          and caption box below stay full-width and don't scroll with it. */}
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={diagram.viewBox}
+          className="h-auto w-full min-w-[720px]"
+          role="img"
+          aria-label={
+            active
+              ? `Architecture diagram, showing step ${stepIndex! + 1} of ${trace.length}: ${active.caption}`
+              : "Architecture diagram of the payment pipeline"
+          }
+        >
         <defs>
           <marker
             id="arch-arrow"
@@ -264,7 +271,8 @@ export default function TracedArchitectureDiagram({
             </g>
           );
         })}
-      </svg>
+        </svg>
+      </div>
 
       {/* Fixed height, not min-height — the caption's length varies step to
           step, and if the box grows with it the Prev/Next/Reset row below

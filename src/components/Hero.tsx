@@ -26,7 +26,7 @@ export default function Hero() {
         <p className="mt-6 max-w-md text-zinc-400">{personal.tagline}</p>
       </div>
 
-      <div className="relative h-72 w-72 shrink-0 sm:h-80 sm:w-80">
+      <div className="relative h-[min(18rem,80vw)] w-[min(18rem,80vw)] shrink-0 sm:h-80 sm:w-80">
         <SparkleDoodle className="absolute -right-2 top-2 z-20 h-6 w-6 text-emerald-400 sm:h-7 sm:w-7" />
         <SquiggleDoodle className="absolute -bottom-3 left-4 z-20 h-4 w-16 text-emerald-400" />
         <PlusDoodle className="absolute -left-5 top-1/2 z-20 h-5 w-5 -translate-y-1/2 text-emerald-400" />

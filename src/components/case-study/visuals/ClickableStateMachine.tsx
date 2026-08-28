@@ -37,12 +37,13 @@ export default function ClickableStateMachine({
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <svg
-        viewBox={viewBox}
-        className="h-auto w-full"
-        role="img"
-        aria-label="Clickable state diagram"
-      >
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={viewBox}
+          className="h-auto w-full min-w-[480px]"
+          role="img"
+          aria-label="Clickable state diagram"
+        >
         <defs>
           <marker
             id="sm-arrow"
@@ -143,7 +144,8 @@ export default function ClickableStateMachine({
             </g>
           );
         })}
-      </svg>
+        </svg>
+      </div>
 
       <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-950/60 p-4">
         <h4 className="font-semibold text-emerald-400">{currentState?.label}</h4>

@@ -103,12 +103,20 @@ export default function PipelineFlow({
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-auto w-full"
-        role="img"
-        aria-label={caption ?? "Flow diagram"}
-      >
+      {/* On a narrow viewport, w-full alone would keep shrinking this SVG
+          to fit the container — shrinking its text right along with it,
+          past the point of being readable. min-w-[640px] stops it from
+          shrinking past roughly its normal desktop render width; wrapping
+          just the SVG (not the caption below) in overflow-x-auto turns
+          that into a horizontal scroll on mobile instead of illegible
+          text, without letting the scroll leak out to the page itself. */}
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="h-auto w-full min-w-[640px]"
+          role="img"
+          aria-label={caption ?? "Flow diagram"}
+        >
         <defs>
           <marker
             id="pipeline-arrow"
@@ -284,7 +292,8 @@ export default function PipelineFlow({
             </g>
           );
         })}
-      </svg>
+        </svg>
+      </div>
       {caption && <p className="mt-3 text-sm text-zinc-400">{caption}</p>}
     </div>
   );

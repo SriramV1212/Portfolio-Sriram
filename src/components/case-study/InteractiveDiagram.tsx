@@ -89,12 +89,13 @@ export default function InteractiveDiagram({
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-      <svg
-        viewBox={viewBox}
-        className="h-auto w-full"
-        role="img"
-        aria-label="Interactive system architecture diagram — click a component for details"
-      >
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={viewBox}
+          className="h-auto w-full min-w-[560px]"
+          role="img"
+          aria-label="Interactive system architecture diagram — click a component for details"
+        >
         <defs>
           <marker
             id="diagram-arrow"
@@ -219,7 +220,8 @@ export default function InteractiveDiagram({
             </g>
           );
         })}
-      </svg>
+        </svg>
+      </div>
 
       <div className="mt-4 rounded-md border border-zinc-800 bg-zinc-950/60 p-4">
         {selectedDetail ? (
