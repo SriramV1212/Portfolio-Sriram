@@ -155,7 +155,7 @@ export const ragCaseStudy: RagCaseStudyContent = {
       nodes: [
         { id: "docs", label: "Anthropic docs", col: 0 },
         { id: "chunk", label: "header-aware chunking", col: 1 },
-        { id: "chunks", label: "~3,100 chunks", col: 2 },
+        { id: "chunks", label: "~3,500 chunks", col: 2 },
         { id: "embed", label: "nomic-embed-text", col: 3 },
         { id: "qdrant", label: "Qdrant · anthropic_docs", col: 4 },
       ],
@@ -166,7 +166,7 @@ export const ragCaseStudy: RagCaseStudyContent = {
         { from: "embed", to: "qdrant" },
       ],
       caption:
-        "ingestion/ingest.py downloads docs.anthropic.com/llms-full.txt, chunks it, embeds every chunk, and upserts into a freshly recreated Qdrant collection — a full run (including a first-time ~550MB model download) finishes in under a minute.",
+        "ingestion/ingest.py downloads docs.anthropic.com/llms-full.txt, chunks it, embeds every chunk, and upserts into a freshly recreated Qdrant collection — a full run (including a first-time ~550MB model download) takes about 24 minutes on a Hetzner AX41 dedicated server, embedding- and CPU-bound.",
     },
     paragraphs: [
       {
@@ -176,7 +176,7 @@ export const ragCaseStudy: RagCaseStudyContent = {
         text: "Every chunk carries its source_url and heading metadata alongside its text, all the way through to Qdrant's payload — that's what lets a retrieved chunk be cited back to a real page, not just quoted anonymously.",
       },
       {
-        text: "Retrieval itself is a cosine-similarity vector search over nomic-embed-text embeddings, not a keyword or full-text match. Lexical search emphasizes matching terms; vector similarity can rank passages by semantic proximity even when the phrasing differs — a question about \"rate limits\" can still surface a passage about \"request throttling.\" The corpus lands at roughly 3,100 chunks after this process, verified by a vector-count check (verify.py) in the 2,500–3,500 range.",
+        text: "Retrieval itself is a cosine-similarity vector search over nomic-embed-text embeddings, not a keyword or full-text match. Lexical search emphasizes matching terms; vector similarity can rank passages by semantic proximity even when the phrasing differs — a question about \"rate limits\" can still surface a passage about \"request throttling.\" The corpus lands at roughly 3,500 chunks after this process, verified by a vector-count check (verify.py) in the 2,500–3,500 range.",
       },
     ],
   },
