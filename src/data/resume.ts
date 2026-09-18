@@ -2,7 +2,7 @@ export const personal = {
   name: "Sriram Vivek",
   role: "Software Engineer",
   tagline:
-    "I build reliable backend and distributed systems, with a focus on correctness, failure handling, and how systems behave beyond the happy path.",
+    "I build reliable backend and distributed systems for financial infrastructure, with a focus on correctness, failure handling, and how systems behave beyond the happy path.",
   email: "sriramv1202@gmail.com",
   linkedin: "https://www.linkedin.com/in/sriram-vivek/",
   github: "https://github.com/SriramV1212",
@@ -20,11 +20,13 @@ export const heroPhrases = [
 
 export const about = {
   paragraphs: [
-    "I started out in electrical engineering, switched to computer science, and spent the last couple years building my foundation in software from the ground up. I care about how things actually behave in production, and I try to think through failure scenarios at scale early in the design process. That shows up in a few things I've built on my own:",
-    "My microservices project uses gRPC across three services, with circuit breakers, retries, mutual TLS between services, and OpenTelemetry/Prometheus/Grafana instrumentation so I can actually see how the system behaves when something fails. On my Kafka-based payment system, I built idempotent event handling and a dead-letter queue so a crash mid-transaction stays recoverable and visible.",
-    "I also apply that same mindset to AI systems, specifically how to make them trustworthy in what they retrieve and how they act. At Galatea Associates, I built a retrieval pipeline turning a 600-page technical spec into something an LLM could use reliably. On my own, I built a full RAG system with a custom MCP server as the access layer to the underlying data, deployed and running end to end on a self managed infrastructure.",
+    "I'm a software engineer focused on backend systems, distributed systems, and applied AI for financial infrastructure, particularly capital markets, banking, and payments, where correctness and reliability have direct consequences.",
+    "At Galatea Associates I worked on an AI proof of concept for a financial services client, writing SQL against portfolio positions, optimizer constraints, and trade outputs, and building a RAG service that turned a 600-page optimizer specification into retrievable context for LLM-generated trade narratives.",
+    "On my own, I've built an event-driven payment backend on Kafka and PostgreSQL with idempotent event processing and dead-letter handling, a gRPC microservices system with circuit breakers, retries, and mutual TLS across services, instrumented with OpenTelemetry, Prometheus, and Grafana so I can see how it behaves when something fails, and a deployed RAG system where a custom MCP server is the only data-access path for the agent.",
+    "Right now I'm rebuilding the payment backend into a double-entry ledger: reproducing a dual-write gap between Postgres and Kafka with a crash-injection harness before fixing it, enforcing debits-equal-credits in the database rather than application code, and using property-based tests to try to break the invariants across generated operation sequences.",
+    "I care most about systems where failures are expensive, correctness matters, and software has to be observable and recoverable.",
     "Outside of work, I'm a pretty big football (soccer) fan, I like cooking, gaming, and getting outside for sports when I can.",
-    "I'm currently looking for full-time software engineering roles, ideally somewhere I get to work on real infrastructure problems. Feel free to reach out.",
+    "I'm currently looking for Software Engineer, Backend Engineer, and AI Engineer roles focused on financial infrastructure.",
   ],
 };
 
@@ -43,10 +45,10 @@ export const experience: ExperienceEntry[] = [
     title: "Financial Software Engineer Intern",
     dates: "June 2025 – August 2025",
     bullets: [
-      "Built a RAG service as part of a development-only AI proof of concept for a financial services client, ingesting a 600-page portfolio optimizer specification to supply retrievable context for LLM-generated trade narratives.",
-      "Built the document ingestion pipeline: PyMuPDF for text and table extraction, LangChain's recursive character splitter for chunking, and text-embedding-3-large for embeddings, stored in a PGVector store for similarity retrieval.",
-      "Wrote SQL against MS SQL Server to extract and reshape portfolio positions, constraints, and trade outputs into structured tables for LLM prompt consumption.",
-      "Authored technical documentation in Confluence and tracked deliverables in JIRA under Agile methodology.",
+      "Contributed to a development-only AI proof of concept for a major financial services client, building a RAG service that gave the LLM retrievable domain context to help interpret portfolio optimizer trade suggestions for financial advisors.",
+      "Built the document ingestion pipeline: PyMuPDF for text and table extraction from a 600-page optimizer specification PDF, LangChain's recursive character splitter for chunking, and text-embedding-3-large for embeddings, stored in a PGVector store for similarity retrieval.",
+      "Investigated gaps in the ingested specification and validated that retrieval surfaced usable context for the narrative prompt, working through an unfamiliar production codebase with limited direction.",
+      "Wrote SQL against MS SQL Server to extract and reshape portfolio positions, constraints, and trade outputs into structured tables for LLM prompt consumption, and authored technical documentation for the RAG service and the broader POC in Confluence while tracking deliverables in JIRA under Agile methodology, collaborating closely with the broader engineering team.",
     ],
   },
 ];
@@ -61,10 +63,19 @@ export type ProjectEntry = {
 
 export const projects: ProjectEntry[] = [
   {
+    slug: "payment-processing-backend",
+    name: "Real-Time Event-Driven Payment Processing Backend",
+    description:
+      "An event-driven payment backend using FastAPI and Apache Kafka to decouple synchronous API ingestion from asynchronous downstream processing, backed by a PostgreSQL state machine that tracks each payment through pending, processed, and failed states. Processing is idempotent — event IDs are tracked with conflict-safe inserts and Kafka offsets are committed manually, so a consumer crash can't cause duplicate charges from a redelivered event. Failed events are routed to a dedicated dead-letter queue topic with structured error context, validated by load-testing with a producer simulating 1,000 payment requests.",
+    tags: ["FastAPI", "Apache Kafka", "PostgreSQL", "Python"],
+    githubUrl:
+      "https://github.com/SriramV1212/Real-Time-Event-Driven-Payment-Processing-Backend",
+  },
+  {
     slug: "agentic-rag-system",
     name: "Agentic RAG System",
     description:
-      "An end-to-end RAG pipeline over Anthropic's API documentation — markdown-aware chunking into ~3,100 chunks, sentence-transformer embeddings, and a self-hosted Qdrant vector store, with full ingestion completing in under 60 seconds. Retrieval is exposed through a custom MCP server (built on the Python MCP SDK) with 4 tools, wired into an agent framework so the agent can only retrieve through MCP — no direct database access. The whole stack runs on a self-managed VPS behind Nginx/TLS with Docker, systemd, and a scripted GitHub Actions redeploy, with a Next.js frontend that includes a retrieval-inspector UI showing citation sources and similarity scores.",
+      "An end-to-end RAG pipeline over Anthropic's API documentation — markdown-aware chunking into roughly 3,500 chunks and a self-hosted Qdrant vector store, with full ingestion (including a first-time ~550MB embedding-model download) taking about 24 minutes on a Hetzner AX41 dedicated server. Retrieval is exposed through a custom MCP server (built on the Python MCP SDK) with 4 tools, wired into an agent framework so the agent can only retrieve through MCP — no direct database access. The whole stack runs on a self-managed VPS behind Nginx/TLS with Docker, systemd, and a scripted GitHub Actions redeploy, with a Next.js frontend that includes a retrieval-inspector UI showing citation sources and similarity scores.",
     tags: [
       "Python",
       "MCP",
@@ -77,15 +88,6 @@ export const projects: ProjectEntry[] = [
       "GitHub Actions",
     ],
     githubUrl: "https://github.com/SriramV1212/Agentic-RAG-System",
-  },
-  {
-    slug: "payment-processing-backend",
-    name: "Real-Time Event-Driven Payment Processing Backend",
-    description:
-      "An event-driven payment backend using FastAPI and Apache Kafka to decouple synchronous API ingestion from asynchronous downstream processing, backed by a PostgreSQL state machine that tracks each payment through pending, processed, and failed states. Processing is idempotent — event IDs are tracked with conflict-safe inserts and Kafka offsets are committed manually, so a consumer crash can't cause duplicate charges or lost events. Failed events are routed to a dedicated dead-letter queue topic with structured error context, validated by load-testing with a producer simulating 1,000 payment requests.",
-    tags: ["FastAPI", "Apache Kafka", "PostgreSQL", "Python"],
-    githubUrl:
-      "https://github.com/SriramV1212/Real-Time-Event-Driven-Payment-Processing-Backend",
   },
   {
     slug: "microservices-resilience-engine",
