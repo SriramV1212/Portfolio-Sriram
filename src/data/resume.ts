@@ -45,10 +45,9 @@ export const experience: ExperienceEntry[] = [
     title: "Financial Software Engineer Intern",
     dates: "June 2025 – August 2025",
     bullets: [
-      "Contributed to a development-only AI proof of concept for a major financial services client, building a RAG service that gave the LLM retrievable domain context to help interpret portfolio optimizer trade suggestions for financial advisors.",
-      "Built the document ingestion pipeline: PyMuPDF for text and table extraction from a 600-page optimizer specification PDF, LangChain's recursive character splitter for chunking, and text-embedding-3-large for embeddings, stored in a PGVector store for similarity retrieval.",
-      "Investigated gaps in the ingested specification and validated that retrieval surfaced usable context for the narrative prompt, working through an unfamiliar production codebase with limited direction.",
-      "Wrote SQL against MS SQL Server to extract and reshape portfolio positions, constraints, and trade outputs into structured tables for LLM prompt consumption, and authored technical documentation for the RAG service and the broader POC in Confluence while tracking deliverables in JIRA under Agile methodology, collaborating closely with the broader engineering team.",
+      "Contributed to a development-only LLM proof of concept for a financial services client that explains a portfolio optimizer's numeric trade suggestions in plain language.",
+      "Wrote 3 multi-table SQL queries in MS SQL Server that fed the LLM suggested trades, industry allocations before and after optimization, and a benchmark comparison, all adopted into the product.",
+      "Cut manual document searching for the team by building a RAG pipeline (LangChain, OpenAI embeddings, PGVector) over a 600-page optimizer specification that adds relevant behavior to the LLM prompt.",
     ],
   },
 ];
@@ -64,18 +63,18 @@ export type ProjectEntry = {
 export const projects: ProjectEntry[] = [
   {
     slug: "payment-processing-backend",
-    name: "Real-Time Event-Driven Payment Processing Backend",
+    name: "Double-Entry Ledger and Payment Engine",
     description:
-      "An event-driven payment backend using FastAPI and Apache Kafka to decouple synchronous API ingestion from asynchronous downstream processing, backed by a PostgreSQL state machine that tracks each payment through pending, processed, and failed states. Processing is idempotent — event IDs are tracked with conflict-safe inserts and Kafka offsets are committed manually, so a consumer crash can't cause duplicate charges from a redelivered event. Failed events are routed to a dedicated dead-letter queue topic with structured error context, validated by load-testing with a producer simulating 1,000 payment requests.",
-    tags: ["FastAPI", "Apache Kafka", "PostgreSQL", "Python"],
+      "A payment system on Kafka and PostgreSQL that takes requests immediately, completes them in the background through Stripe (test mode), and stays correct under retries and crashes. API-level idempotency keys took 1,000 concurrent identical requests from 40 payments down to 1, a transactional outbox between PostgreSQL and Kafka recovers payments stranded by an API crash, and a double-entry ledger that rejects unbalanced entries keeps every payment fully accounted for, verified by 10 pytest integration tests.",
+    tags: ["FastAPI", "Apache Kafka", "PostgreSQL", "Python", "Stripe"],
     githubUrl:
       "https://github.com/SriramV1212/Real-Time-Event-Driven-Payment-Processing-Backend",
   },
   {
     slug: "agentic-rag-system",
-    name: "Agentic RAG System",
+    name: "Agentic RAG System with Custom MCP Server",
     description:
-      "An end-to-end RAG pipeline over Anthropic's API documentation — markdown-aware chunking into roughly 3,500 chunks and a self-hosted Qdrant vector store, with full ingestion (including a first-time ~550MB embedding-model download) taking about 24 minutes on a Hetzner AX41 dedicated server. Retrieval is exposed through a custom MCP server (built on the Python MCP SDK) with 4 tools, wired into an agent framework so the agent can only retrieve through MCP — no direct database access. The whole stack runs on a self-managed VPS behind Nginx/TLS with Docker, systemd, and a scripted GitHub Actions redeploy, with a Next.js frontend that includes a retrieval-inspector UI showing citation sources and similarity scores.",
+      "A RAG agent on Qdrant that answers questions from Anthropic API docs and declines questions they don't cover. Every answer is grounded in retrieved sources because the agent is limited to 4 retrieval tools on a custom MCP server, and a Next.js dashboard surfaces the retrieved passages, similarity scores, and citations so users can verify answers. Deployed with GitHub Actions CI/CD to Vercel and a Linux server behind Nginx.",
     tags: [
       "Python",
       "MCP",
@@ -91,9 +90,9 @@ export const projects: ProjectEntry[] = [
   },
   {
     slug: "microservices-resilience-engine",
-    name: "Distributed Microservices Orchestration & Resilience Engine",
+    name: "Flight Booking Microservices System",
     description:
-      "A multi-service gRPC backend with a central orchestrator aggregating responses from separate User and Search services over protobuf-defined contracts, using server-side streaming for real-time result delivery. Circuit breakers and exponential backoff retries contain partial failures across services, and mutual TLS secures every cross-service call. Distributed tracing runs through OpenTelemetry gRPC interceptors capturing both function- and business-level spans, visualized in Jaeger, with Prometheus and Grafana for metrics — the observability stack runs via Docker Compose.",
+      "A flight booking backend of 3 Python microservices (User, Search, Orchestrator) over gRPC. Retries with exponential backoff raised booking success from 49% to 91.5% when half of Search calls failed, and a circuit breaker cut calls to a fully down service from 300 to 11 per 100 requests. Service-to-service calls are secured with mutual TLS, and distributed tracing (OpenTelemetry, Jaeger) plus metrics (Prometheus, Grafana) make slow requests debuggable.",
     tags: [
       "gRPC",
       "Protobuf",
@@ -114,64 +113,54 @@ export type SkillGroup = {
 };
 
 export const skills: SkillGroup[] = [
-  { category: "Programming Languages", items: ["Python", "SQL", "Linux"] },
   {
-    category: "Backend & Data",
+    category: "Development Tools",
+    items: ["Claude Code CLI", "Codex", "Cursor", "Git"],
+  },
+  { category: "Programming Languages", items: ["Python", "SQL"] },
+  { category: "Databases", items: ["PostgreSQL", "MS SQL Server", "Qdrant"] },
+  {
+    category: "Backend & Distributed Systems",
     items: [
       "FastAPI",
+      "REST APIs",
       "gRPC",
-      "PostgreSQL",
-      "MySQL",
-      "MS SQL Server",
-      "MongoDB",
+      "Protocol Buffers",
       "Apache Kafka",
-      "Apache Spark",
-      "Redis",
+      "Event-driven architecture",
+      "Microservices",
+      "Transactional outbox",
+      "Dead-letter queue (DLQ)",
+      "pytest",
     ],
   },
   {
-    category: "Infrastructure & DevOps",
+    category: "Infrastructure & Observability",
     items: [
+      "AWS (S3, EC2, Lambda)",
       "Docker",
-      "Kubernetes",
-      "Airflow",
+      "CI/CD (GitHub Actions)",
+      "Linux",
       "Nginx",
       "systemd",
-      "AWS (S3, EC2, Lambda)",
-      "Azure",
-      "GitHub Actions",
-      "Git",
-    ],
-  },
-  { category: "Observability", items: ["Prometheus", "Grafana", "Jaeger"] },
-  {
-    category: "ML & AI",
-    items: [
-      "Pandas",
-      "NumPy",
-      "RAG",
-      "LangChain",
-      "Prompt Engineering",
-      "Model Context Protocol (MCP)",
-      "OpenClaw",
-      "Hermes",
+      "Prometheus",
+      "Grafana",
+      "Jaeger",
+      "OpenTelemetry",
+      "Distributed tracing",
     ],
   },
   {
-    category: "LLM Tooling & Vector DBs",
-    items: ["LangSmith", "LlamaIndex", "LangGraph", "Pinecone", "ChromaDB", "Qdrant"],
+    category: "Generative AI & LLMs",
+    items: ["RAG", "LangChain", "Model Context Protocol (MCP)"],
   },
-  {
-    category: "AI-Assisted Development",
-    items: ["Claude Code CLI", "Codex", "Cursor"],
-  },
-  { category: "Frontend", items: ["Next.js", "TypeScript", "Vercel"] },
 ];
 
 // A skill's display label doesn't always match its tag on a project card
 // verbatim (e.g. the full skill name includes a parenthetical abbreviation).
 const skillTagAliases: Record<string, string> = {
   "Model Context Protocol (MCP)": "MCP",
+  "CI/CD (GitHub Actions)": "GitHub Actions",
 };
 
 const projectTags = new Set(projects.flatMap((project) => project.tags));
@@ -201,7 +190,7 @@ export const education: EducationEntry[] = [
       "Master of Science in Computer Science and Applied Mathematics (Data Science)",
     dates: "Aug 2024 – May 2026",
     courses:
-      "Data Structures and Algorithms, Computer Networks, Programming Abstractions, Theory of Computation, Data Management, Big Data Systems, Big Data Analysis, Probability, Data Analysis, Statistical Learning, Statistical Computing",
+      "Data Structures and Algorithms, Computer Networks, Programming Abstractions, Theory of Computation, Data Management, Big Data Systems, Big Data Analysis, Probability, Statistical Learning, Statistical Computing",
     logo: "/education/stony-brook.png",
   },
   {
